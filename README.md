@@ -34,6 +34,8 @@ Upload **`acc-firefox.zip`**. Check **Firefox** and **Firefox for Android**.
 
 Firefox manifest includes `background.scripts` fallback (required by AMO). Add-on ID: `aichatcleaner@sunnyc.de`.
 
+Since Nov 2025 AMO requires `gecko.data_collection_permissions`. ACC declares `required: ["none"]` (no data sent to the developer).
+
 ## One-click install
 
 End users install from official stores (AMO, Chrome Web Store, Edge Add-ons). GitHub ships ZIP/XPI for manual install and store submission.

@@ -39,6 +39,7 @@ jobs:
           test -f dist/bookmarklet.txt
           unzip -l dist/acc-firefox.zip | grep manifest.json
           unzip -p dist/acc-firefox.zip manifest.json | grep -q '"scripts"'
+          unzip -p dist/acc-firefox.zip manifest.json | grep -q 'data_collection_permissions'
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

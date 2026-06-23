@@ -36,6 +36,8 @@ Bei „Mit welchen Anwendungen kompatibel?“ **Firefox** und **Firefox für And
 
 Der AMO-Fehler mit `service_worker` ist behoben: Firefox-Manifest enthält jetzt `background.scripts` als Fallback.
 
+Seit Nov 2025 verlangt AMO `browser_specific_settings.gecko.data_collection_permissions`. ACC setzt `required: ["none"]` (keine Datenübertragung an den Entwickler).
+
 Neue Add-on-ID: `aichatcleaner@sunnyc.de` (neuer Upload, nicht die alte `claude-deleter@…`-ID).
 
 Quellcode bei AMO angeben: GitHub-Repo + `npm ci && npm run build`.

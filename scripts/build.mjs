@@ -145,6 +145,8 @@ async function main() {
       "Upload: acc-firefox.zip (or acc-firefox.xpi — identical)",
       "Check: Firefox AND Firefox for Android",
       "",
+      "Manifest must include gecko.data_collection_permissions.",
+      "ACC uses required: [\"none\"] — no data sent to the developer.",
       "New add-on ID: aichatcleaner@sunnyc.de",
       "(If you started an upload with the old ID, cancel and upload as new add-on.)",
       "",
