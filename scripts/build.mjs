@@ -9,9 +9,9 @@ const root = join(__dirname, "..");
 const dist = join(root, "dist");
 
 const BROWSERS = [
-  { id: "chrome", manifest: "chrome.json", zip: "claude-deleter-chrome.zip" },
-  { id: "edge", manifest: "chrome.json", zip: "claude-deleter-edge.zip", readme: "edge-README.txt" },
-  { id: "firefox", manifest: "firefox.json", zip: "claude-deleter-firefox.zip", xpi: true },
+  { id: "chrome", manifest: "chrome.json", zip: "acc-chrome.zip" },
+  { id: "edge", manifest: "chrome.json", zip: "acc-edge.zip", readme: "edge" },
+  { id: "firefox", manifest: "firefox.json", zip: "acc-firefox.zip", xpi: true },
 ];
 
 function bundle(entry, outfile) {
@@ -29,17 +29,16 @@ function bundle(entry, outfile) {
 function writeIcons(dir) {
   mkdirSync(join(dir, "icons"), { recursive: true });
   for (const size of [16, 48, 128]) {
-  execSync(
-    `convert -size ${size}x${size} xc:'#d97757' -fill white -gravity center -pointsize ${
-      Math.max(8, Math.floor(size / 3))
-    } -annotate 0 'C' ${join(dir, "icons", `icon-${size}.png`)}`,
-    { stdio: "ignore" }
-  );
+    execSync(
+      `convert -size ${size}x${size} xc:'#d97757' -fill white -gravity center -pointsize ${
+        Math.max(8, Math.floor(size / 3))
+      } -annotate 0 'A' ${join(dir, "icons", `icon-${size}.png`)}`,
+      { stdio: "ignore" }
+    );
   }
 }
 
 function writeIconsFallback(dir) {
-  // Minimal 1x1 PNG (orange) scaled via SVG if ImageMagick missing
   const pngBase64 =
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
   const buf = Buffer.from(pngBase64, "base64");
@@ -82,8 +81,7 @@ async function buildExtension({ id, manifest, zip, xpi, readme }) {
     writeFileSync(
       join(out, "INSTALL-EDGE.txt"),
       "Microsoft Edge uses the same Chromium extension format as Chrome.\n" +
-        "Install via edge://extensions → Developer mode → Load unpacked (this folder),\n" +
-        "or load the Chrome zip if sideloading is enabled.\n"
+        "Install via edge://extensions → Developer mode → Load unpacked (this folder).\n"
     );
   }
 
@@ -100,7 +98,7 @@ async function buildExtension({ id, manifest, zip, xpi, readme }) {
 }
 
 async function buildConsole() {
-  const out = join(dist, "console-deleter.js");
+  const out = join(dist, "acc-console.js");
   await esbuild.build({
     entryPoints: [join(root, "src/console.js")],
     outfile: out,
@@ -118,15 +116,15 @@ async function buildConsole() {
   writeFileSync(
     join(dist, "CONSOLE-README.txt"),
     [
-      "Manual console usage (no extension):",
+      "AI Chat Cleaner — console script (no extension)",
       "1. Log in at https://claude.ai",
       "2. Open DevTools → Console",
-      "3. Paste the contents of console-deleter.js and press Enter",
+      "3. Paste acc-console.js and press Enter",
       "",
       "Bookmarklet: copy bookmarklet.txt into a bookmark URL field.",
     ].join("\n") + "\n"
   );
-  console.log("Built console-deleter.js + bookmarklet.txt");
+  console.log("Built acc-console.js + bookmarklet.txt");
 }
 
 async function main() {
@@ -142,39 +140,48 @@ async function main() {
   writeFileSync(
     join(dist, "AMO-README.txt"),
     [
-      "Mozilla Firefox (AMO) upload — claude-deleter-firefox.zip",
+      "Mozilla AMO upload — acc-firefox.zip",
       "",
-      "What to upload on addons.mozilla.org:",
-      "  Use claude-deleter-firefox.zip (or claude-deleter-firefox.xpi — same content).",
-      "  manifest.json must be at the root of the archive (it is).",
+      "Upload: acc-firefox.zip (or acc-firefox.xpi — identical)",
+      "Check: Firefox AND Firefox for Android",
       "",
-      "Do NOT upload the Chrome or Edge zip.",
+      "New add-on ID: aichatcleaner@sunnyc.de",
+      "(If you started an upload with the old ID, cancel and upload as new add-on.)",
       "",
-      "Source code:",
-      "  AMO will likely ask for source because JS is bundled (esbuild).",
-      "  Point reviewers to: https://github.com/benjarogit/claudedeleter",
-      "  Build: npm ci && npm run build",
+      "Source code (bundled JS):",
+      "  https://github.com/benjarogit/claudedeleter",
+      "  npm ci && npm run build",
       "",
-      "Compatibility:",
-      "  Check only Firefox (desktop). Uncheck Firefox for Android unless tested.",
+      "Author: Sunny C. — https://sunnyc.de",
+    ].join("\n") + "\n"
+  );
+
+  writeFileSync(
+    join(dist, "MOBILE-README.txt"),
+    [
+      "Mobile extension support",
       "",
-      "One-click install for end users:",
-      "  Only AFTER AMO approval — users install from addons.mozilla.org.",
-      "  Unsigned .xpi from GitHub cannot be one-click installed in Firefox Release.",
+      "Supported:",
+      "  Firefox for Android 113+ (check in AMO upload)",
+      "",
+      "Not supported by platform:",
+      "  Chrome for Android — no arbitrary extensions (desktop only)",
+      "  Edge mobile — no extension sideloading",
+      "  Safari iOS — no WebExtension sideloading like desktop",
+      "",
+      "On Firefox Android: install from AMO after approval, open claude.ai,",
+      "tap the ACC icon in the browser menu.",
     ].join("\n") + "\n"
   );
 
   writeFileSync(
     join(dist, "SAFARI-README.txt"),
     [
-      "Safari Web Extension (manual):",
-      "1. Build Chrome extension: npm run build",
-      "2. On macOS with Xcode: run",
-      "   xcrun safari-web-extension-converter dist/chrome --app-name 'Claude Deleter'",
-      "3. Open the generated Xcode project, set your Team for signing, build & run.",
-      "4. Enable the extension in Safari → Settings → Extensions.",
-      "",
-      "GitHub Actions cannot ship a signed Safari .app; Apple requires local signing.",
+      "Safari Web Extension (macOS):",
+      "1. npm run build",
+      "2. xcrun safari-web-extension-converter dist/chrome --app-name 'AI Chat Cleaner'",
+      "3. Xcode: set Signing Team, build & run",
+      "4. Safari → Settings → Extensions → enable ACC",
     ].join("\n") + "\n"
   );
 

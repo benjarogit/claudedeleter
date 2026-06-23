@@ -1,124 +1,75 @@
-# Claude Deleter
+# AI Chat Cleaner (ACC)
 
-[English](README.md)
+[English](README.md) · [Sunny C.](https://sunnyc.de)
 
 Alle Unterhaltungen auf [claude.ai](https://claude.ai) gesammelt löschen.
 
-Fork von [emcquee/claudedeleter](https://github.com/emcquee/claudedeleter), modernisiert für Manifest V3 mit Builds für Chrome, Firefox, Edge und ein eigenständiges Konsolen-Skript.
+Fork von [emcquee/claudedeleter](https://github.com/emcquee/claudedeleter), weiterentwickelt von **Sunny C.** — [sunnyc.de](https://sunnyc.de)
 
 ## Downloads
 
-Fertige Pakete liegen bei [GitHub Releases](https://github.com/benjarogit/claudedeleter/releases) (Tag `v1.0.0` und neuer):
+[GitHub Releases](https://github.com/benjarogit/claudedeleter/releases):
 
-| Datei | Browser |
-|-------|---------|
-| `claude-deleter-chrome.zip` | Google Chrome |
-| `claude-deleter-firefox.zip` / `.xpi` | Mozilla Firefox (AMO-Upload oder manuell) |
-| `claude-deleter-edge.zip` | Microsoft Edge |
-| `console-deleter.js` | Beliebiger Browser (ohne Erweiterung) |
-| `bookmarklet.txt` | Bookmarklet-URL (optional) |
+| Datei | Ziel |
+|-------|------|
+| `acc-firefox.zip` / `.xpi` | Firefox Desktop + **Firefox für Android** |
+| `acc-chrome.zip` | Chrome Desktop |
+| `acc-edge.zip` | Edge Desktop |
+| `acc-console.js` | Beliebiger Browser (ohne Erweiterung) |
 
-## Ein-Klick-Installation vs. GitHub-Releases
+## Mobile Unterstützung
 
-**Warum GitHub nur ZIP/XPI hat:** Browser erlauben aus Sicherheitsgründen kein „Klick → installieren“ von beliebigen Websites mehr (früher ging das, heute nicht).
+| Plattform | Erweiterungen |
+|-----------|---------------|
+| **Firefox für Android** | Ja (nach AMO-Installation) |
+| Chrome Android | Nein (Google-Richtlinie) |
+| Edge mobil | Nein |
+| Safari iOS | Nein |
 
-| Browser | Ein-Klick für Endnutzer | GitHub Release |
-|---------|-------------------------|----------------|
-| **Firefox** | Nach Freigabe auf [addons.mozilla.org](https://addons.mozilla.org) | ZIP/XPI zum Hochladen bei AMO oder manuelles Laden |
-| **Chrome** | Nur [Chrome Web Store](https://chrome.google.com/webstore) | ZIP entpacken → `chrome://extensions` → Entwicklermodus |
-| **Edge** | Nur [Edge Add-ons](https://microsoftedge.microsoft.com/addons) | wie Chrome |
+Details: `MOBILE-README.txt` im Release.
 
-**Mozilla AMO hochladen:** `claude-deleter-firefox.zip` wählen (`.xpi` ist identisch). Nur **Firefox Desktop** ankreuzen. Quellcode angeben: GitHub-Repo + `npm ci && npm run build`. Details in `AMO-README.txt` im Release.
+## Mozilla AMO — was hochladen?
+
+**`acc-firefox.zip`** wählen (`.xpi` ist identisch).
+
+Bei „Mit welchen Anwendungen kompatibel?“ **Firefox** und **Firefox für Android** ankreuzen.
+
+Der AMO-Fehler mit `service_worker` ist behoben: Firefox-Manifest enthält jetzt `background.scripts` als Fallback.
+
+Neue Add-on-ID: `aichatcleaner@sunnyc.de` (neuer Upload, nicht die alte `claude-deleter@…`-ID).
+
+Quellcode bei AMO angeben: GitHub-Repo + `npm ci && npm run build`.
+
+## Ein-Klick-Installation
+
+Für Endnutzer nur über offizielle Stores (AMO, Chrome Web Store, Edge Add-ons). GitHub liefert ZIP/XPI für manuelle Installation und Store-Einreichung.
 
 ## Manuelle Installation
 
-### Google Chrome
+### Firefox (Desktop & Android)
 
-1. `claude-deleter-chrome.zip` von [Releases](https://github.com/benjarogit/claudedeleter/releases) herunterladen und entpacken.
-2. `chrome://extensions` öffnen.
-3. **Entwicklermodus** aktivieren (oben rechts).
-4. **Entpackte Erweiterung laden** klicken und den entpackten Ordner wählen (mit `manifest.json` darin).
-5. Erweiterung über das Puzzle-Symbol anheften.
+**Nach AMO-Freigabe:** von addons.mozilla.org installieren.
 
-**Alternativ:** Nach `npm run build` den Ordner `dist/chrome` auf dieselbe Weise laden.
+**Temporär (Desktop):** `about:debugging` → Temporäres Add-on laden → `manifest.json` aus entpacktem `acc-firefox.zip`.
 
-> Hinweis „Diese Erweiterung stammt nicht aus dem Chrome Web Store“ ist bei manueller Installation normal.
+**Android:** Nach AMO-Install in Firefox für Android `claude.ai` öffnen → Menü → Erweiterungen → ACC.
 
-### Microsoft Edge
+### Chrome / Edge
 
-1. `claude-deleter-edge.zip` herunterladen und entpacken (gleiches Format wie Chrome).
-2. `edge://extensions` öffnen.
-3. **Entwicklermodus** aktivieren.
-4. **Entpackte Erweiterung laden** und den Ordner auswählen.
-5. Bestätigen, falls Edge nach Erweiterungen außerhalb des Stores fragt.
+1. `acc-chrome.zip` oder `acc-edge.zip` entpacken
+2. `chrome://extensions` bzw. `edge://extensions` → Entwicklermodus → Entpackte Erweiterung laden
 
-### Mozilla Firefox
+### Konsole (ohne Erweiterung)
 
-**Temporär (zum Testen)**
+1. Auf claude.ai einloggen
+2. Entwicklertools → Konsole → `acc-console.js` einfügen → Enter
 
-1. `claude-deleter-firefox.zip` entpacken.
-2. `about:debugging#/runtime/this-firefox` öffnen.
-3. **Temporäres Add-on laden…** → `manifest.json` im Ordner wählen.
-4. Das Add-on verschwindet beim Schließen von Firefox.
-
-**Dauerhaft (unsigniert, nur ESR / Developer Edition)**
-
-Die normale Firefox-Version erlaubt nur signierte Add-ons. Für dauerhafte unsignierte Nutzung: Firefox Developer Edition oder ESR, in `about:config` `xpinstall.signatures.required` auf `false`, dann wie oben laden. Für den Alltag: Veröffentlichung auf [addons.mozilla.org](https://addons.mozilla.org) (siehe Store-Hinweise unten in der Chat-Antwort).
-
-### Safari (nur macOS)
-
-1. Chrome-Build besorgen (`dist/chrome` oder entpacktes Chrome-Zip).
-2. Auf dem Mac mit Xcode in Terminal:
-
-   ```bash
-   xcrun safari-web-extension-converter dist/chrome --app-name "Claude Deleter"
-   ```
-
-3. Xcode-Projekt öffnen, **Signing Team** setzen, einmal bauen und starten.
-4. Safari → **Einstellungen** → **Erweiterungen** → **Claude Deleter** aktivieren.
-
-Nach lokalem Build auch `dist/SAFARI-README.txt` lesen.
-
-### Konsolen-Skript (ohne Erweiterung)
-
-1. Auf [claude.ai](https://claude.ai) einloggen.
-2. **Entwicklertools** (F12) → **Konsole**.
-3. Gesamten Inhalt von `console-deleter.js` einfügen, Enter.
-4. Lösch-Dialog bestätigen.
-
-**Bookmarklet:** Lesezeichen anlegen, URL = eine Zeile aus `bookmarklet.txt`. Auf claude.ai das Lesezeichen anklicken. Manche Browser begrenzen die URL-Länge.
-
-## Bedienung
-
-1. Beliebige `https://claude.ai/*`-Seite geöffnet und eingeloggt.
-2. Erweiterungs-Icon → **Delete all chats** → bestätigen.
-3. Fortschrittsanzeige abwarten.
-
-Die Erweiterung nutzt dieselbe API wie die Website (`credentials: include`). Kurze Pause zwischen Löschvorgängen schützt vor Rate-Limits.
-
-## Aus Quellcode bauen
+## Build
 
 ```bash
-npm ci
-npm run build
+npm ci && npm run build
 ```
-
-Ergebnis in `dist/`:
-
-- `chrome/`, `firefox/`, `edge/` — entpackte Erweiterungen
-- `*.zip` — Release-Pakete
-- `console-deleter.js`, `bookmarklet.txt`
-
-## Projektstruktur
-
-- `src/lib/deleter.js` — gemeinsame Lösch-Logik
-- `src/content.js` — Content Script auf claude.ai
-- `src/popup/` — Toolbar-UI
-- `src/background.js` — MV3 Service Worker
-- `src/console.js` — Konsolen-Einstieg
-- `scripts/build.mjs` — Bundle + ZIP
-- `.github/workflows/build.yml` — CI bei Push; Release-Artefakte bei Versions-Tags
 
 ## Lizenz
 
-MIT — siehe [LICENSE](LICENSE).
+MIT — Copyright (c) 2026 [Sunny C.](https://sunnyc.de)

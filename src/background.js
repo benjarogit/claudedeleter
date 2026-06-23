@@ -1,17 +1,18 @@
-// MV3 service worker — keeps the worker alive during long delete runs.
-const ALARM_NAME = "claude-deleter-keepalive";
+// MV3 background — service worker (Chrome) or script (Firefox fallback).
+const api = globalThis.browser ?? globalThis.chrome;
+const ALARM_NAME = "acc-keepalive";
 
-chrome.runtime.onMessage.addListener((message) => {
+api.runtime.onMessage.addListener((message) => {
   if (message.action === "deleteAll" || message.action === "updateProgress") {
-    chrome.alarms.create(ALARM_NAME, { periodInMinutes: 0.4 });
+    api.alarms.create(ALARM_NAME, { periodInMinutes: 0.4 });
   }
   if (message.action === "complete" || message.action === "error") {
-    chrome.alarms.clear(ALARM_NAME);
+    api.alarms.clear(ALARM_NAME);
   }
 });
 
-chrome.alarms.onAlarm.addListener((alarm) => {
+api.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === ALARM_NAME) {
-    console.log("[Claude Deleter] keepalive");
+    console.log("[ACC] keepalive");
   }
 });

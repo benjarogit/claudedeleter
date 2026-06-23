@@ -1,7 +1,7 @@
 import { deleteAllChats } from "./lib/deleter.js";
 import { onRuntimeMessage, sendRuntimeMessage } from "./lib/api.js";
 
-console.log("[Claude Deleter] content script loaded");
+console.log("[ACC] content script loaded");
 
 onRuntimeMessage((request, _sender, sendResponse) => {
   if (request.action !== "deleteAll") {
@@ -20,7 +20,7 @@ onRuntimeMessage((request, _sender, sendResponse) => {
     },
   })
     .catch((error) => {
-      console.error("[Claude Deleter]", error);
+      console.error("[ACC]", error);
       sendRuntimeMessage({ action: "error", error: error.message });
     });
 

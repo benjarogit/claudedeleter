@@ -31,22 +31,23 @@ jobs:
 
       - name: Verify artifacts
         run: |
-          test -f dist/claude-deleter-chrome.zip
-          test -f dist/claude-deleter-firefox.zip
-          test -f dist/claude-deleter-firefox.xpi
-          test -f dist/claude-deleter-edge.zip
-          test -f dist/console-deleter.js
+          test -f dist/acc-chrome.zip
+          test -f dist/acc-firefox.zip
+          test -f dist/acc-firefox.xpi
+          test -f dist/acc-edge.zip
+          test -f dist/acc-console.js
           test -f dist/bookmarklet.txt
-          unzip -l dist/claude-deleter-chrome.zip | grep manifest.json
+          unzip -l dist/acc-firefox.zip | grep manifest.json
+          unzip -p dist/acc-firefox.zip manifest.json | grep -q '"scripts"'
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: claude-deleter-build
+          name: acc-build
           path: |
             dist/*.zip
             dist/*.xpi
-            dist/console-deleter.js
+            dist/acc-console.js
             dist/bookmarklet.txt
             dist/*README.txt
           if-no-files-found: error
@@ -60,20 +61,21 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: claude-deleter-build
+          name: acc-build
           path: dist
 
       - name: Attach to release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/claude-deleter-chrome.zip
-            dist/claude-deleter-firefox.zip
-            dist/claude-deleter-firefox.xpi
-            dist/claude-deleter-edge.zip
-            dist/console-deleter.js
+            dist/acc-chrome.zip
+            dist/acc-firefox.zip
+            dist/acc-firefox.xpi
+            dist/acc-edge.zip
+            dist/acc-console.js
             dist/bookmarklet.txt
             dist/CONSOLE-README.txt
             dist/AMO-README.txt
+            dist/MOBILE-README.txt
             dist/SAFARI-README.txt
           overwrite_files: true
