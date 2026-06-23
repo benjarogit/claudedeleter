@@ -40,6 +40,11 @@ jobs:
           unzip -l dist/acc-firefox.zip | grep manifest.json
           unzip -p dist/acc-firefox.zip manifest.json | grep -q '"scripts"'
           unzip -p dist/acc-firefox.zip manifest.json | grep -q 'data_collection_permissions'
+          unzip -p dist/acc-firefox.zip manifest.json | grep -qv 'service_worker'
+          for s in 16 48 128; do
+            unzip -p dist/acc-firefox.zip icons/icon-${s}.png > /tmp/icon-${s}.png
+            node -e "const b=require('fs').readFileSync('/tmp/icon-${s}.png');const w=b.readUInt32BE(16),h=b.readUInt32BE(20);if(w!==${s}||h!==${s}){console.error('icon-${s}:',w,'x',h);process.exit(1)}"
+          done
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

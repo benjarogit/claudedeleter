@@ -2,6 +2,7 @@ import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "no
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
+import { deflateSync } from "node:zlib";
 import * as esbuild from "esbuild";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -26,34 +27,73 @@ function bundle(entry, outfile) {
   });
 }
 
+const CRC_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let k = 0; k < 8; k++) {
+      c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    }
+    table[i] = c;
+  }
+  return table;
+})();
+
+function crc32(buf) {
+  let c = 0xffffffff;
+  for (let i = 0; i < buf.length; i++) {
+    c = CRC_TABLE[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
+  }
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+function pngChunk(type, data) {
+  const typeBuf = Buffer.from(type, "ascii");
+  const len = Buffer.alloc(4);
+  len.writeUInt32BE(data.length);
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(Buffer.concat([typeBuf, data])));
+  return Buffer.concat([len, typeBuf, data, crc]);
+}
+
+/** Solid RGB PNG — no ImageMagick required (CI-safe). */
+function solidPng(width, height, r, g, b) {
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = 8;
+  ihdr[9] = 2;
+  ihdr[10] = 0;
+  ihdr[11] = 0;
+  ihdr[12] = 0;
+
+  const stride = 1 + width * 3;
+  const raw = Buffer.alloc(height * stride);
+  for (let y = 0; y < height; y++) {
+    const row = y * stride;
+    raw[row] = 0;
+    for (let x = 0; x < width; x++) {
+      const o = row + 1 + x * 3;
+      raw[o] = r;
+      raw[o + 1] = g;
+      raw[o + 2] = b;
+    }
+  }
+
+  const sig = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+  return Buffer.concat([
+    sig,
+    pngChunk("IHDR", ihdr),
+    pngChunk("IDAT", deflateSync(raw)),
+    pngChunk("IEND", Buffer.alloc(0)),
+  ]);
+}
+
 function writeIcons(dir) {
   mkdirSync(join(dir, "icons"), { recursive: true });
+  // ACC brand color #d97757
   for (const size of [16, 48, 128]) {
-    execSync(
-      `convert -size ${size}x${size} xc:'#d97757' -fill white -gravity center -pointsize ${
-        Math.max(8, Math.floor(size / 3))
-      } -annotate 0 'A' ${join(dir, "icons", `icon-${size}.png`)}`,
-      { stdio: "ignore" }
-    );
-  }
-}
-
-function writeIconsFallback(dir) {
-  const pngBase64 =
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
-  const buf = Buffer.from(pngBase64, "base64");
-  mkdirSync(join(dir, "icons"), { recursive: true });
-  for (const size of [16, 48, 128]) {
-    writeFileSync(join(dir, "icons", `icon-${size}.png`), buf);
-  }
-}
-
-function hasConvert() {
-  try {
-    execSync("which convert", { stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
+    writeFileSync(join(dir, "icons", `icon-${size}.png`), solidPng(size, size, 217, 119, 87));
   }
 }
 
@@ -70,12 +110,7 @@ async function buildExtension({ id, manifest, zip, xpi, readme }) {
   copyFileSync(join(root, "src/popup/popup.css"), join(out, "popup/popup.css"));
   copyFileSync(join(root, "manifests", manifest), join(out, "manifest.json"));
 
-  try {
-    if (hasConvert()) writeIcons(out);
-    else writeIconsFallback(out);
-  } catch {
-    writeIconsFallback(out);
-  }
+  writeIcons(out);
 
   if (readme) {
     writeFileSync(
@@ -164,7 +199,7 @@ async function main() {
       "Mobile extension support",
       "",
       "Supported:",
-      "  Firefox for Android 113+ (check in AMO upload)",
+      "  Firefox for Android 142+ (check in AMO upload)",
       "",
       "Not supported by platform:",
       "  Chrome for Android — no arbitrary extensions (desktop only)",
