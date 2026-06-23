@@ -1,9 +1,24 @@
-import { clickEachTrash, clickKeywords, confirmDialogs, KW } from "../dom.js";
-import { assertRemaining, report, runDeleteLoop, sleep, tryMethods } from "../shared.js";
+import {
+  clickClaudeOverflowDeletes,
+  clickKeywords,
+  confirmDialogs,
+  countUniqueChatLinks,
+  findToolbarButton,
+  KW,
+} from "../dom.js";
+import { navigateTo } from "../navigate.js";
+import { report, runDeleteLoop, sleep, tryMethods } from "../shared.js";
 
 const ORIGIN = "https://claude.ai";
 
-async function getOrganizationId(fetchFn) {
+function parseChatList(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.conversations)) return data.conversations;
+  return [];
+}
+
+async function getOrganizations(fetchFn) {
   const response = await fetchFn(`${ORIGIN}/api/organizations`, {
     credentials: "include",
     headers: { Accept: "application/json" },
@@ -11,67 +26,131 @@ async function getOrganizationId(fetchFn) {
   if (!response.ok) throw new Error(`organizations HTTP ${response.status}`);
   const data = await response.json();
   if (!data?.length) throw new Error("No organizations found");
-  return data[0].uuid;
+  return data;
 }
 
-async function getChatIds(orgId, fetchFn) {
+async function getChatIdsForOrg(orgId, fetchFn) {
   const response = await fetchFn(
     `${ORIGIN}/api/organizations/${orgId}/chat_conversations`,
     { credentials: "include", headers: { Accept: "application/json" } }
   );
   if (!response.ok) throw new Error(`chat list HTTP ${response.status}`);
-  const data = await response.json();
-  return data.map((c) => c.uuid);
+  return parseChatList(await response.json()).map((c) => c.uuid).filter(Boolean);
 }
 
-async function countChats(fetchFn) {
-  try {
-    const orgId = await getOrganizationId(fetchFn);
-    return (await getChatIds(orgId, fetchFn)).length;
-  } catch {
-    return document.querySelectorAll('[data-testid="chat-item"], a[href*="/chat/"]').length;
+/** All chats across orgs the user can access. */
+async function getAllChatsWithOrg(fetchFn) {
+  const orgs = await getOrganizations(fetchFn);
+  const chats = [];
+
+  for (const org of orgs) {
+    try {
+      const ids = await getChatIdsForOrg(org.uuid, fetchFn);
+      for (const chatId of ids) {
+        chats.push({ orgId: org.uuid, chatId });
+      }
+    } catch {
+      /* org without chat permission — skip */
+    }
+  }
+
+  return chats;
+}
+
+async function countApiChats(fetchFn) {
+  const chats = await getAllChatsWithOrg(fetchFn);
+  return chats.length;
+}
+
+/** API + DOM must both be empty — API-only check caused false success. */
+async function assertAllGone(fetchFn) {
+  const apiCount = await countApiChats(fetchFn);
+  const domCount = countUniqueChatLinks();
+  const parts = [];
+  if (apiCount > 0) parts.push(`${apiCount} in API`);
+  if (domCount > 0) parts.push(`${domCount} visible in UI`);
+  if (parts.length) {
+    throw new Error(`Claude chats still remain (${parts.join(", ")})`);
   }
 }
 
 async function deleteAllApi(fetchFn, onProgress, delayMs) {
-  const orgId = await getOrganizationId(fetchFn);
-  const chatIds = await getChatIds(orgId, fetchFn);
-  if (!chatIds.length) {
-    const domCount = document.querySelectorAll(
-      '[data-testid="chat-item"], a[href*="/chat/"]'
-    ).length;
-    if (domCount > 0) throw new Error(`API listed 0 chats but ${domCount} visible in sidebar`);
+  const chats = await getAllChatsWithOrg(fetchFn);
+  if (!chats.length) {
+    const domCount = countUniqueChatLinks();
+    if (domCount > 0) {
+      throw new Error(`API listed 0 chats but ${domCount} visible in UI`);
+    }
     return { deleted: 0, total: 0 };
   }
 
   const result = await runDeleteLoop({
-    ids: chatIds,
+    ids: chats,
     delayMs,
     label: "chat",
     onProgress,
-    deleteOne: async (chatId) => {
+    deleteOne: async ({ orgId, chatId }) => {
       const response = await fetchFn(
         `${ORIGIN}/api/organizations/${orgId}/chat_conversations/${chatId}`,
         { method: "DELETE", credentials: "include", headers: { Accept: "application/json" } }
       );
-      if (!response.ok) throw new Error(`delete ${chatId} HTTP ${response.status}`);
+      if (!response.ok && response.status !== 204) {
+        throw new Error(`delete ${chatId} HTTP ${response.status}`);
+      }
+      const remaining = await getChatIdsForOrg(orgId, fetchFn);
+      if (remaining.includes(chatId)) {
+        throw new Error(`chat ${chatId} still in API after DELETE`);
+      }
     },
   });
 
-  await assertRemaining(() => countChats(fetchFn), 0, "Claude chats");
+  await assertAllGone(fetchFn);
   return result;
 }
 
-async function deleteAllDom() {
-  await clickKeywords(KW.history, { timeout: 5000 });
-  await sleep(600);
-
-  let deleted = await clickEachTrash({ max: 200, delayMs: 400 });
-  if (!deleted) {
-    deleted = await clickEachTrash({ max: 50, delayMs: 500 });
+async function deleteRecentsBulk(ctx) {
+  if (!location.pathname.startsWith("/recents")) {
+    await navigateTo(`${ORIGIN}/recents`, {
+      providerId: "claude",
+      step: "dom-recents",
+      method: "dom-recents",
+      tabId: ctx.tabId,
+    });
   }
-  if (!deleted) throw new Error("No Claude delete controls in sidebar");
-  return { deleted, total: deleted };
+
+  await sleep(800);
+
+  const inSelectMode = findToolbarButton(KW.cancel);
+  if (!inSelectMode) {
+    const started = await clickKeywords(KW.selectChats, { timeout: 10000 });
+    if (!started) throw new Error("Recents “Chats auswählen” not found");
+    await sleep(400);
+  }
+
+  const selectAll = await clickKeywords(KW.selectAll, { timeout: 8000 });
+  if (!selectAll) throw new Error("Recents “Alles auswählen” not found");
+  await sleep(400);
+
+  const deleteBtn = findToolbarButton(KW.delete);
+  if (!deleteBtn) throw new Error("Recents bulk “Löschen” button not found");
+  deleteBtn.click();
+  await sleep(500);
+  await confirmDialogs();
+  await sleep(1200);
+
+  await assertAllGone(ctx.fetchFn);
+  return { deleted: "all", total: "all" };
+}
+
+async function deleteViaOverflow(ctx) {
+  const before = countUniqueChatLinks();
+  if (!before) return { deleted: 0, total: 0 };
+
+  const deleted = await clickClaudeOverflowDeletes({ max: before + 10, delayMs: 450 });
+  if (!deleted) throw new Error("No Claude ⋮→Löschen menus found");
+
+  await assertAllGone(ctx.fetchFn);
+  return { deleted, total: before };
 }
 
 export const claudeProvider = {
@@ -88,10 +167,15 @@ export const claudeProvider = {
   async deleteAll(ctx) {
     report(ctx.onProgress, { type: "status", message: "Claude: starting…", overall: 5 });
 
+    if (ctx.step === "dom-recents") {
+      return { ...(await deleteRecentsBulk(ctx)), method: "dom-recents", provider: "claude" };
+    }
+
     const result = await tryMethods(
       [
         { name: "api", step: null, fn: () => deleteAllApi(ctx.fetchFn, ctx.onProgress, ctx.delayMs) },
-        { name: "dom-sidebar", step: "dom-sidebar", fn: deleteAllDom },
+        { name: "dom-recents", step: "dom-recents", fn: () => deleteRecentsBulk(ctx) },
+        { name: "dom-overflow", step: "dom-overflow", fn: () => deleteViaOverflow(ctx) },
       ],
       ctx
     );

@@ -29,6 +29,9 @@ export const KW = {
   ],
   more: ["mehr", "more", "more actions", "weitere", "options", "aktionen"],
   grok: ["grok", "third-party", "third party", "collaborators"],
+  selectChats: ["chats auswählen", "select chats"],
+  selectAll: ["alles auswählen", "select all"],
+  cancel: ["abbrechen", "cancel"],
 };
 
 function norm(s) {
@@ -163,4 +166,49 @@ export async function waitFor(condition, { timeout = 15000, interval = 250 } = {
     await sleep(interval);
   }
   return false;
+}
+
+/** Unique Claude/ChatGPT-style chat IDs from visible /chat/ links. */
+export function countUniqueChatLinks() {
+  const ids = new Set();
+  for (const a of document.querySelectorAll('a[href*="/chat/"]')) {
+    const match = a.href.match(/\/chat\/([a-f0-9-]+)/i);
+    if (match && match[1] !== "new") ids.add(match[1]);
+  }
+  return ids.size;
+}
+
+/** Claude sidebar/recents: ⋮ → Löschen per row. */
+export async function clickClaudeOverflowDeletes({ max = 120, delayMs = 500 } = {}) {
+  let deleted = 0;
+  for (let i = 0; i < max; i++) {
+    const menus = [
+      ...document.querySelectorAll(
+        'button[aria-label*="Weitere Optionen" i], button[aria-label*="More options" i]'
+      ),
+    ].filter(isVisible);
+    if (!menus.length) break;
+
+    menus[0].click();
+    await sleep(350);
+    const del = findByKeywords(KW.delete);
+    if (!del) break;
+
+    del.click();
+    await sleep(300);
+    await confirmDialogs();
+    deleted++;
+    await sleep(delayMs);
+  }
+  return deleted;
+}
+
+export function findToolbarButton(keywords) {
+  return (
+    queryClickables().find((el) => {
+      if (el.disabled) return false;
+      const hay = elementText(el);
+      return keywords.some((k) => hay === norm(k) || hay.includes(norm(k)));
+    }) ?? null
+  );
 }
