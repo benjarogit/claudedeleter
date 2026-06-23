@@ -1,8 +1,17 @@
-import { clickEachTrash, clickKeywords, confirmDialogs, KW } from "../dom.js";
+import {
+  clickKeywords,
+  confirmDialogs,
+  findAllByKeywords,
+  findByKeywords,
+  findToolbarButton,
+  KW,
+} from "../dom.js";
 import { geminiBatchInPage } from "../gemini-page.js";
-import { assertRemaining, report, runDeleteLoop, tryMethods } from "../shared.js";
+import { navigateTo } from "../navigate.js";
+import { report, runDeleteLoop, sleep, tryMethods } from "../shared.js";
 
-const ORIGIN = "https://gemini.google.com";
+const GEMINI_ORIGIN = "https://gemini.google.com";
+const MYACTIVITY_URL = "https://myactivity.google.com/product/gemini?utm_source=gemini";
 
 function normalizeGeminiId(id) {
   if (!id) return null;
@@ -55,11 +64,27 @@ async function listChatIds() {
   return listChatIdsFromDom();
 }
 
-async function countChats() {
+async function assertGeminiGone(fetchFn) {
+  let apiCount = null;
   try {
-    return (await listChatIds()).length;
+    apiCount = (await listChatIds()).length;
   } catch {
-    return listChatIdsFromDom().length;
+    /* batchexecute unavailable off gemini.google.com */
+  }
+
+  const domCount = listChatIdsFromDom().length;
+  const parts = [];
+  if (apiCount > 0) parts.push(`${apiCount} in API`);
+  if (domCount > 0) parts.push(`${domCount} visible in sidebar`);
+  if (parts.length) {
+    throw new Error(`Gemini chats still remain (${parts.join(", ")})`);
+  }
+}
+
+async function goToGeminiForVerify() {
+  if (location.hostname !== "gemini.google.com") {
+    location.assign(`${GEMINI_ORIGIN}/app`);
+    await sleep(2500);
   }
 }
 
@@ -73,7 +98,7 @@ async function deleteChatId(cid) {
   }
 }
 
-async function deleteAllApi(onProgress, delayMs) {
+async function deleteAllApi(fetchFn, onProgress, delayMs) {
   const ids = await listChatIds();
   if (!ids.length) {
     const domCount = listChatIdsFromDom().length;
@@ -89,25 +114,124 @@ async function deleteAllApi(onProgress, delayMs) {
     deleteOne: (id) => deleteChatId(id),
   });
 
-  await assertRemaining(countChats, 0, "Gemini chats");
+  await assertGeminiGone(fetchFn);
   return result;
 }
 
-async function deleteAllDom() {
-  await clickKeywords(KW.history, { timeout: 8000 });
+function findGeminiOverflowMenu() {
+  const byKeyword = findByKeywords(KW.more);
+  if (byKeyword) return byKeyword;
 
-  let deleted = await clickEachTrash({ max: 150, delayMs: 500 });
-  if (!deleted) {
-    const bulk = await clickKeywords(KW.deleteAll, { timeout: 5000 });
-    if (bulk) {
-      await confirmDialogs();
-      return { deleted: "all", total: "all" };
-    }
+  const selectors = [
+    'button[aria-label*="Optionen" i]',
+    'button[aria-label*="options" i]',
+    'button[aria-label*="Unterhaltung" i]',
+    'button[aria-label*="conversation" i]',
+  ];
+  for (const sel of selectors) {
+    const el = document.querySelector(sel);
+    if (el?.offsetParent) return el;
+  }
+  return null;
+}
+
+/** Sidebar ⋮ → Löschen per chat. */
+async function deleteSidebarMenus(onProgress) {
+  const estimated = Math.max(listChatIdsFromDom().length, 1);
+  let deleted = 0;
+
+  for (let i = 0; i < 150; i++) {
+    const menu = findGeminiOverflowMenu();
+    if (!menu) break;
+
+    report(onProgress, {
+      type: "status",
+      message: `Deleting chat ${deleted + 1} via menu…`,
+      overall: Math.min(10 + ((deleted + 1) / estimated) * 85, 95),
+      current: 40,
+    });
+
+    menu.click();
+    await sleep(400);
+    const del = findByKeywords(KW.delete);
+    if (!del) break;
+
+    del.click();
+    await sleep(300);
+    await confirmDialogs();
+    deleted++;
+
+    report(onProgress, {
+      type: "status",
+      message: `Deleted ${deleted} via sidebar menu`,
+      overall: Math.min(10 + (deleted / estimated) * 85, 95),
+      current: 100,
+    });
+    await sleep(450);
   }
 
-  if (!deleted) throw new Error("No Gemini delete controls found");
-  await confirmDialogs();
+  if (!deleted) throw new Error("No Gemini sidebar delete menus found");
   return { deleted, total: deleted };
+}
+
+async function confirmMyActivityModal() {
+  await sleep(600);
+  const deleteButtons = findAllByKeywords(KW.delete).filter(
+    (el) => el.offsetParent && !el.disabled
+  );
+  const confirmBtn =
+    deleteButtons.find((el) => {
+      const label = (el.textContent || el.getAttribute("aria-label") || "").toLowerCase();
+      return label.includes("löschen") || label.includes("delete");
+    }) ?? deleteButtons.at(-1);
+
+  if (confirmBtn) {
+    confirmBtn.click();
+    return true;
+  }
+  return clickKeywords(KW.confirm, { timeout: 8000 });
+}
+
+/** My Activity → Löschen → Gesamte Zeit (fast bulk). */
+async function deleteMyActivityDom(ctx) {
+  const onMyActivity =
+    location.hostname === "myactivity.google.com" && location.pathname.includes("/product/gemini");
+
+  if (!onMyActivity && ctx.step !== "myactivity-delete") {
+    await navigateTo(MYACTIVITY_URL, {
+      providerId: "gemini",
+      step: "myactivity-delete",
+      method: "dom-myactivity",
+      tabId: ctx.tabId,
+    });
+  }
+
+  await sleep(1500);
+
+  const deleteDropdown = findToolbarButton(["löschen", "delete"]);
+  if (!deleteDropdown) throw new Error("My Activity “Löschen” dropdown not found");
+  deleteDropdown.click();
+  await sleep(500);
+
+  const allTime = await clickKeywords(KW.allTime, { timeout: 10000 });
+  if (!allTime) throw new Error("My Activity “Gesamte Zeit” option not found");
+
+  await sleep(800);
+  const confirmed = await confirmMyActivityModal();
+  if (!confirmed) throw new Error("My Activity delete confirmation not found");
+
+  await sleep(3000);
+  await goToGeminiForVerify();
+  await sleep(1500);
+
+  try {
+    await assertGeminiGone(ctx.fetchFn);
+  } catch {
+    await sleep(3000);
+    await assertGeminiGone(ctx.fetchFn);
+  }
+
+  return { deleted: "all", total: "all" };
 }
 
 export const geminiProvider = {
@@ -115,7 +239,9 @@ export const geminiProvider = {
   name: "Gemini",
   match(url) {
     try {
-      return new URL(url).hostname === "gemini.google.com";
+      const u = new URL(url);
+      if (u.hostname === "gemini.google.com") return true;
+      return u.hostname === "myactivity.google.com" && u.pathname.includes("/product/gemini");
     } catch {
       return false;
     }
@@ -124,14 +250,27 @@ export const geminiProvider = {
   async deleteAll(ctx) {
     report(ctx.onProgress, { type: "status", message: "Gemini: starting…", overall: 5 });
 
+    if (ctx.step === "myactivity-delete") {
+      return { ...(await deleteMyActivityDom(ctx)), method: "dom-myactivity", provider: "gemini" };
+    }
+
     const result = await tryMethods(
       [
+        { name: "dom-myactivity", step: "myactivity-delete", fn: () => deleteMyActivityDom(ctx) },
         {
           name: "api-batchexecute",
           step: null,
-          fn: () => deleteAllApi(ctx.onProgress, ctx.delayMs),
+          fn: () => deleteAllApi(ctx.fetchFn, ctx.onProgress, ctx.delayMs),
         },
-        { name: "dom-sidebar", step: "dom-sidebar", fn: deleteAllDom },
+        {
+          name: "dom-sidebar",
+          step: null,
+          fn: async () => {
+            const r = await deleteSidebarMenus(ctx.onProgress);
+            await assertGeminiGone(ctx.fetchFn);
+            return r;
+          },
+        },
       ],
       ctx
     );

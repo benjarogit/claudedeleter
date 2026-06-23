@@ -35,6 +35,7 @@ export const KW = {
   selectChats: ["chats auswählen", "select chats"],
   selectAll: ["alles auswählen", "select all"],
   cancel: ["abbrechen", "cancel"],
+  allTime: ["gesamte zeit", "all time", "all-time"],
 };
 
 function norm(s) {

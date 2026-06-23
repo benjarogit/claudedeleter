@@ -68,7 +68,7 @@ Pro Plattform zuerst die **interne API**, bei Fehler **DOM-Fallbacks**.
 |-----------|--------|----------|
 | Claude | REST API (`DELETE` pro Chat) | Sidebar-Papierkorb |
 | ChatGPT | Datenkontrollen → **Alle löschen** (Bulk) | API pro Chat → Sidebar ⋮ |
-| Gemini | `batchexecute` RPC (Page-Kontext) | Sidebar-Löschen |
+| Gemini | [My Activity](https://myactivity.google.com/product/gemini) → **Gesamte Zeit** | `batchexecute` API → Sidebar ⋮ |
 | Grok.com | `DELETE /rest/app-chat/conversations` | Verlauf-UI (Mehr → Löschen) |
 | Grok auf X | GraphQL-Löschen (wenn Op in Page gefunden) | Chatverlauf → Mehr → Löschen |
 
