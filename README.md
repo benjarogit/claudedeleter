@@ -13,10 +13,22 @@ Pre-built packages are attached to [GitHub Releases](https://github.com/benjarog
 | File | Browser |
 |------|---------|
 | `claude-deleter-chrome.zip` | Google Chrome |
-| `claude-deleter-firefox.zip` | Mozilla Firefox |
+| `claude-deleter-firefox.zip` / `.xpi` | Mozilla Firefox (AMO upload or manual) |
 | `claude-deleter-edge.zip` | Microsoft Edge |
 | `console-deleter.js` | Any browser (no extension) |
 | `bookmarklet.txt` | Bookmarklet URL (optional) |
+
+## One-click install vs. GitHub Releases
+
+**Why GitHub only has ZIP/XPI:** Browsers no longer allow “click to install” from arbitrary websites (security policy).
+
+| Browser | One-click for users | GitHub Release |
+|---------|---------------------|----------------|
+| **Firefox** | After approval on [addons.mozilla.org](https://addons.mozilla.org) | ZIP/XPI for AMO upload or manual sideload |
+| **Chrome** | [Chrome Web Store](https://chrome.google.com/webstore) only | Unzip → `chrome://extensions` → Developer mode |
+| **Edge** | [Edge Add-ons](https://microsoftedge.microsoft.com/addons) only | Same as Chrome |
+
+**Mozilla AMO upload:** Use `claude-deleter-firefox.zip` (`.xpi` is identical). Check **Firefox desktop** only. Provide source: GitHub repo + `npm ci && npm run build`. See `AMO-README.txt` in the release.
 
 ## Manual installation
 

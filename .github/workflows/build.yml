@@ -33,6 +33,7 @@ jobs:
         run: |
           test -f dist/claude-deleter-chrome.zip
           test -f dist/claude-deleter-firefox.zip
+          test -f dist/claude-deleter-firefox.xpi
           test -f dist/claude-deleter-edge.zip
           test -f dist/console-deleter.js
           test -f dist/bookmarklet.txt
@@ -44,6 +45,7 @@ jobs:
           name: claude-deleter-build
           path: |
             dist/*.zip
+            dist/*.xpi
             dist/console-deleter.js
             dist/bookmarklet.txt
             dist/*README.txt
@@ -67,9 +69,11 @@ jobs:
           files: |
             dist/claude-deleter-chrome.zip
             dist/claude-deleter-firefox.zip
+            dist/claude-deleter-firefox.xpi
             dist/claude-deleter-edge.zip
             dist/console-deleter.js
             dist/bookmarklet.txt
             dist/CONSOLE-README.txt
+            dist/AMO-README.txt
             dist/SAFARI-README.txt
           overwrite_files: true

@@ -11,7 +11,7 @@ const dist = join(root, "dist");
 const BROWSERS = [
   { id: "chrome", manifest: "chrome.json", zip: "claude-deleter-chrome.zip" },
   { id: "edge", manifest: "chrome.json", zip: "claude-deleter-edge.zip", readme: "edge-README.txt" },
-  { id: "firefox", manifest: "firefox.json", zip: "claude-deleter-firefox.zip" },
+  { id: "firefox", manifest: "firefox.json", zip: "claude-deleter-firefox.zip", xpi: true },
 ];
 
 function bundle(entry, outfile) {
@@ -58,7 +58,7 @@ function hasConvert() {
   }
 }
 
-async function buildExtension({ id, manifest, zip, readme }) {
+async function buildExtension({ id, manifest, zip, xpi, readme }) {
   const out = join(dist, id);
   rmSync(out, { recursive: true, force: true });
   mkdirSync(join(out, "popup"), { recursive: true });
@@ -91,6 +91,12 @@ async function buildExtension({ id, manifest, zip, readme }) {
   rmSync(zipPath, { force: true });
   execSync(`cd "${out}" && zip -r "${zipPath}" .`, { stdio: "ignore" });
   console.log(`Built ${zip}`);
+
+  if (xpi) {
+    const xpiPath = zipPath.replace(/\.zip$/, ".xpi");
+    copyFileSync(zipPath, xpiPath);
+    console.log(`Built ${xpiPath.split("/").pop()}`);
+  }
 }
 
 async function buildConsole() {
@@ -132,6 +138,31 @@ async function main() {
   }
 
   await buildConsole();
+
+  writeFileSync(
+    join(dist, "AMO-README.txt"),
+    [
+      "Mozilla Firefox (AMO) upload — claude-deleter-firefox.zip",
+      "",
+      "What to upload on addons.mozilla.org:",
+      "  Use claude-deleter-firefox.zip (or claude-deleter-firefox.xpi — same content).",
+      "  manifest.json must be at the root of the archive (it is).",
+      "",
+      "Do NOT upload the Chrome or Edge zip.",
+      "",
+      "Source code:",
+      "  AMO will likely ask for source because JS is bundled (esbuild).",
+      "  Point reviewers to: https://github.com/benjarogit/claudedeleter",
+      "  Build: npm ci && npm run build",
+      "",
+      "Compatibility:",
+      "  Check only Firefox (desktop). Uncheck Firefox for Android unless tested.",
+      "",
+      "One-click install for end users:",
+      "  Only AFTER AMO approval — users install from addons.mozilla.org.",
+      "  Unsigned .xpi from GitHub cannot be one-click installed in Firefox Release.",
+    ].join("\n") + "\n"
+  );
 
   writeFileSync(
     join(dist, "SAFARI-README.txt"),
