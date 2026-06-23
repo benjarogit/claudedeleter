@@ -216,3 +216,37 @@ export function findToolbarButton(keywords) {
     }) ?? null
   );
 }
+
+/** Click first visible element whose trimmed text exactly matches (DE/EN). */
+export async function clickVisibleExactText(texts, { timeout = 10000 } = {}) {
+  const want = texts.map((t) => norm(t));
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    for (const el of document.querySelectorAll(
+      'li, [role="menuitem"], [role="option"], button, a, span, div'
+    )) {
+      if (!isVisible(el)) continue;
+      const t = norm(el.textContent || "");
+      if (want.some((w) => t === w)) {
+        el.click();
+        await sleep(450);
+        return true;
+      }
+    }
+    await sleep(200);
+  }
+  return false;
+}
+
+export function findByAriaIncludes(fragment, root = document) {
+  const needle = fragment.toLowerCase();
+  for (const el of root.querySelectorAll("[aria-label]")) {
+    const aria = (el.getAttribute("aria-label") || "").toLowerCase();
+    if (aria.includes(needle) && isVisible(el)) return el;
+  }
+  return null;
+}
+
+export function queryVisible(selector, root = document) {
+  return [...root.querySelectorAll(selector)].filter(isVisible);
+}

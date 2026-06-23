@@ -1,9 +1,10 @@
 import {
   clickKeywords,
+  clickVisibleExactText,
   confirmDialogs,
-  findAllByKeywords,
   findByKeywords,
-  findToolbarButton,
+  queryVisible,
+  waitFor,
   KW,
 } from "../dom.js";
 import { geminiBatchInPage } from "../gemini-page.js";
@@ -51,7 +52,7 @@ function listChatIdsFromDom() {
 }
 
 async function listChatIds() {
-  const payloads = [50, 100, 25];
+  const payloads = [100, 50, 25];
   for (const size of payloads) {
     try {
       const data = await geminiBatchInPage("MaZiqc", [size]);
@@ -64,18 +65,47 @@ async function listChatIds() {
   return listChatIdsFromDom();
 }
 
-async function assertGeminiGone(fetchFn) {
+function countMyActivityItems() {
+  return document.querySelectorAll(
+    'button[aria-label^="Aktivitätselement löschen"], button[aria-label^="Delete activity"]'
+  ).length;
+}
+
+/**
+ * Live-verified on myactivity.google.com/product/gemini:
+ * bulk dropdown = button text/aria exactly "Löschen" (not "Aktivitätselement löschen").
+ */
+function findMyActivityBulkDeleteDropdown() {
+  return (
+    queryVisible("button").find((b) => {
+      const text = (b.textContent || "").trim();
+      const aria = b.getAttribute("aria-label") || "";
+      return (
+        (text === "Löschen" || text === "Delete") &&
+        (aria === "Löschen" || aria === "Delete")
+      );
+    }) ?? null
+  );
+}
+
+async function assertGeminiGone() {
   let apiCount = null;
   try {
-    apiCount = (await listChatIds()).length;
+    if (location.hostname === "gemini.google.com") {
+      apiCount = (await listChatIds()).length;
+    }
   } catch {
-    /* batchexecute unavailable off gemini.google.com */
+    /* batchexecute unavailable */
   }
 
   const domCount = listChatIdsFromDom().length;
+  const activityCount =
+    location.hostname === "myactivity.google.com" ? countMyActivityItems() : null;
+
   const parts = [];
   if (apiCount > 0) parts.push(`${apiCount} in API`);
   if (domCount > 0) parts.push(`${domCount} visible in sidebar`);
+  if (activityCount > 0) parts.push(`${activityCount} in My Activity`);
   if (parts.length) {
     throw new Error(`Gemini chats still remain (${parts.join(", ")})`);
   }
@@ -98,7 +128,7 @@ async function deleteChatId(cid) {
   }
 }
 
-async function deleteAllApi(fetchFn, onProgress, delayMs) {
+async function deleteAllApi(onProgress, delayMs) {
   const ids = await listChatIds();
   if (!ids.length) {
     const domCount = listChatIdsFromDom().length;
@@ -114,28 +144,20 @@ async function deleteAllApi(fetchFn, onProgress, delayMs) {
     deleteOne: (id) => deleteChatId(id),
   });
 
-  await assertGeminiGone(fetchFn);
+  await assertGeminiGone();
   return result;
 }
 
 function findGeminiOverflowMenu() {
-  const byKeyword = findByKeywords(KW.more);
-  if (byKeyword) return byKeyword;
-
-  const selectors = [
-    'button[aria-label*="Optionen" i]',
-    'button[aria-label*="options" i]',
-    'button[aria-label*="Unterhaltung" i]',
-    'button[aria-label*="conversation" i]',
-  ];
-  for (const sel of selectors) {
-    const el = document.querySelector(sel);
-    if (el?.offsetParent) return el;
-  }
-  return null;
+  return (
+    queryVisible('button[aria-label*="Optionen" i], button[aria-label*="options" i]')[0] ??
+    queryVisible(
+      'button[aria-label*="Unterhaltung" i], button[aria-label*="conversation" i]'
+    )[0] ??
+    findByKeywords(KW.more)
+  );
 }
 
-/** Sidebar ⋮ → Löschen per chat. */
 async function deleteSidebarMenus(onProgress) {
   const estimated = Math.max(listChatIdsFromDom().length, 1);
   let deleted = 0;
@@ -174,17 +196,19 @@ async function deleteSidebarMenus(onProgress) {
   return { deleted, total: deleted };
 }
 
+/** Live-verified: confirm dialog has Abbrechen + Löschen buttons. */
 async function confirmMyActivityModal() {
-  await sleep(600);
-  const deleteButtons = findAllByKeywords(KW.delete).filter(
-    (el) => el.offsetParent && !el.disabled
-  );
-  const confirmBtn =
-    deleteButtons.find((el) => {
-      const label = (el.textContent || el.getAttribute("aria-label") || "").toLowerCase();
-      return label.includes("löschen") || label.includes("delete");
-    }) ?? deleteButtons.at(-1);
-
+  await sleep(700);
+  const confirmBtn = queryVisible("button").find((b) => {
+    const t = (b.textContent || "").trim();
+    const aria = (b.getAttribute("aria-label") || "").toLowerCase();
+    return (
+      (t === "Löschen" || t === "Delete") &&
+      !aria.includes("abbrechen") &&
+      !aria.includes("cancel") &&
+      !aria.includes("aktivitätselement")
+    );
+  });
   if (confirmBtn) {
     confirmBtn.click();
     return true;
@@ -192,7 +216,6 @@ async function confirmMyActivityModal() {
   return clickKeywords(KW.confirm, { timeout: 8000 });
 }
 
-/** My Activity → Löschen → Gesamte Zeit (fast bulk). */
 async function deleteMyActivityDom(ctx) {
   const onMyActivity =
     location.hostname === "myactivity.google.com" && location.pathname.includes("/product/gemini");
@@ -208,27 +231,51 @@ async function deleteMyActivityDom(ctx) {
 
   await sleep(1500);
 
-  const deleteDropdown = findToolbarButton(["löschen", "delete"]);
-  if (!deleteDropdown) throw new Error("My Activity “Löschen” dropdown not found");
+  const deleteDropdown = findMyActivityBulkDeleteDropdown();
+  if (!deleteDropdown) throw new Error("My Activity bulk “Löschen” dropdown not found");
   deleteDropdown.click();
-  await sleep(500);
+  await sleep(700);
 
-  const allTime = await clickKeywords(KW.allTime, { timeout: 10000 });
-  if (!allTime) throw new Error("My Activity “Gesamte Zeit” option not found");
+  let picked = await clickVisibleExactText(["Gesamte Zeit", "All time", "All Time"], {
+    timeout: 8000,
+  });
+  if (!picked) picked = await clickKeywords(KW.allTime, { timeout: 5000 });
 
-  await sleep(800);
+  if (!picked) {
+    const before = countMyActivityItems();
+    if (!before) return { deleted: 0, total: 0 };
+    for (let i = 0; i < before + 5; i++) {
+      const itemBtn = document.querySelector(
+        'button[aria-label^="Aktivitätselement löschen"], button[aria-label^="Delete activity"]'
+      );
+      if (!itemBtn) break;
+      itemBtn.click();
+      await sleep(400);
+      await confirmMyActivityModal();
+      await sleep(500);
+    }
+    if (countMyActivityItems() > 0) {
+      throw new Error("My Activity individual delete did not clear all items");
+    }
+    await goToGeminiForVerify();
+    await assertGeminiGone();
+    return { deleted: before, total: before };
+  }
+
+  await sleep(900);
   const confirmed = await confirmMyActivityModal();
   if (!confirmed) throw new Error("My Activity delete confirmation not found");
 
-  await sleep(3000);
+  await waitFor(() => countMyActivityItems() === 0, { timeout: 30000, interval: 1000 });
+  await sleep(1000);
   await goToGeminiForVerify();
-  await sleep(1500);
+  await sleep(2000);
 
   try {
-    await assertGeminiGone(ctx.fetchFn);
+    await assertGeminiGone();
   } catch {
     await sleep(3000);
-    await assertGeminiGone(ctx.fetchFn);
+    await assertGeminiGone();
   }
 
   return { deleted: "all", total: "all" };
@@ -260,14 +307,14 @@ export const geminiProvider = {
         {
           name: "api-batchexecute",
           step: null,
-          fn: () => deleteAllApi(ctx.fetchFn, ctx.onProgress, ctx.delayMs),
+          fn: () => deleteAllApi(ctx.onProgress, ctx.delayMs),
         },
         {
           name: "dom-sidebar",
           step: null,
           fn: async () => {
             const r = await deleteSidebarMenus(ctx.onProgress);
-            await assertGeminiGone(ctx.fetchFn);
+            await assertGeminiGone();
             return r;
           },
         },
