@@ -157,10 +157,55 @@ export async function clickEachMoreDelete({ max = 100, delayMs = 450 } = {}) {
 
 export async function confirmDialogs() {
   for (let i = 0; i < 3; i++) {
-    const ok = await clickKeywords(KW.confirm, { timeout: 2000 });
+    const dialogBtn = findDialogConfirmButton();
+    if (dialogBtn) {
+      dialogBtn.click();
+      await sleep(400);
+      continue;
+    }
+    const ok = await clickKeywords(
+      ["confirm", "bestätigen", "bestaetigen", "yes", "ja", "ok", "continue", "fortfahren", "permanently", "dauerhaft"],
+      { timeout: 1500 }
+    );
     if (!ok) break;
     await sleep(350);
   }
+}
+
+/** Confirm in [role=dialog] — avoids clicking sidebar menuitem "Löschen". */
+export function findDialogConfirmButton() {
+  for (const dialog of document.querySelectorAll('[role="dialog"]')) {
+    if (!isVisible(dialog)) continue;
+    const buttons = queryVisible("button", dialog);
+    const cancel = buttons.find((b) => matchesKeywords(b, KW.cancel));
+    const confirm = buttons.find((b) => {
+      if (cancel && b === cancel) return false;
+      const hay = elementText(b);
+      if (matchesKeywords(b, KW.cancel)) return false;
+      return (
+        matchesKeywords(b, KW.delete) ||
+        /^(yes|ja|ok|confirm|bestätigen|bestaetigen|delete|löschen|loeschen)$/i.test(hay)
+      );
+    });
+    if (confirm) return confirm;
+  }
+
+  const heading = [...document.querySelectorAll("h1, h2")].find((h) =>
+    /chat löschen|delete chat|delete conversation|unterhaltung löschen/i.test(h.textContent || "")
+  );
+  if (!heading) return null;
+
+  const root = heading.closest('[role="dialog"]') || heading.parentElement?.parentElement;
+  if (!root) return null;
+
+  const buttons = queryVisible("button", root);
+  const cancel = buttons.find((b) => matchesKeywords(b, KW.cancel));
+  return (
+    buttons.find((b) => {
+      if (cancel && b === cancel) return false;
+      return matchesKeywords(b, KW.delete);
+    }) ?? null
+  );
 }
 
 export async function openOverflowMenus(root = document) {
@@ -216,19 +261,34 @@ export function findGeminiSidebarOverflowButtons(root = document) {
 }
 
 export function findGeminiSidebarChatLinks(root = document) {
-  const seen = new Set();
-  const links = [];
-  const scope = findGeminiSidebarScope(root);
-  for (const a of scope.querySelectorAll('a[href*="/app/"]')) {
-    const match = a.href.match(/\/app\/([a-zA-Z0-9_-]+)/);
-    if (!match || seen.has(match[1])) continue;
-    const raw = match[1];
-    if (/signout|options|search/i.test(raw)) continue;
-    if (!/^[a-z0-9_]{8,}$/i.test(raw)) continue;
-    seen.add(match[1]);
-    links.push(a);
+  const collect = (scope) => {
+    const seen = new Set();
+    const links = [];
+    for (const a of scope.querySelectorAll('a[href*="/app/"]')) {
+      const match = a.href.match(/\/app\/([a-zA-Z0-9_-]+)/);
+      if (!match || seen.has(match[1])) continue;
+      const raw = match[1];
+      if (/signout|options|search/i.test(raw)) continue;
+      if (!/^[a-z0-9_]{8,}$/i.test(raw)) continue;
+      seen.add(match[1]);
+      links.push(a);
+    }
+    return links;
+  };
+
+  const scoped = collect(findGeminiSidebarScope(root));
+  return scoped.length ? scoped : collect(root);
+}
+
+export async function ensureGeminiRecentsExpanded() {
+  const btn = [...document.querySelectorAll("button")].find((b) => {
+    const label = `${b.getAttribute("aria-label") || ""} ${b.textContent || ""}`.toLowerCase();
+    return /letzte unterhaltungen|recent conversations|recent chats|chats récents/i.test(label);
+  });
+  if (btn?.getAttribute("aria-expanded") === "false") {
+    btn.click();
+    await sleep(450);
   }
-  return links;
 }
 
 /** Recents bulk mode: toolbar has cancel, or row checkboxes are visible. */

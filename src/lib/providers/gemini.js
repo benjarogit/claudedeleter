@@ -3,6 +3,7 @@ import {
   confirmDialogs,
   countGeminiSidebarChats,
   countMyActivityItems,
+  ensureGeminiRecentsExpanded,
   findGeminiSidebarChatLinks,
   findGeminiSidebarOverflowButtons,
   findMyActivityBulkDeleteDropdown,
@@ -59,25 +60,29 @@ function listChatIdsFromDom() {
 }
 
 async function assertGeminiGone() {
-  let apiCount = null;
-  try {
-    if (location.hostname === "gemini.google.com") {
-      apiCount = (await listChatIds()).length;
-    }
-  } catch {
-    /* batchexecute unavailable */
+  const domCount = Math.max(listChatIdsFromDom().length, countGeminiSidebarChats());
+  if (domCount > 0) {
+    throw new Error(`Gemini chats still remain (${domCount} visible in sidebar)`);
   }
 
-  const domCount = Math.max(listChatIdsFromDom().length, countGeminiSidebarChats());
   const activityCount =
     location.hostname === "myactivity.google.com" ? countMyActivityItems() : null;
+  if (activityCount > 0) {
+    throw new Error(`${activityCount} Gemini items still remain in My Activity`);
+  }
 
-  const parts = [];
-  if (apiCount > 0) parts.push(`${apiCount} in API`);
-  if (domCount > 0) parts.push(`${domCount} visible in sidebar`);
-  if (activityCount > 0) parts.push(`${activityCount} in My Activity`);
-  if (parts.length) {
-    throw new Error(`Gemini chats still remain (${parts.join(", ")})`);
+  if (location.hostname !== "gemini.google.com") return;
+
+  try {
+    const apiCount = (await listChatIds()).length;
+    if (apiCount > 0) {
+      await sleep(2000);
+      const domRetry = Math.max(listChatIdsFromDom().length, countGeminiSidebarChats());
+      if (domRetry === 0) return;
+      throw new Error(`Gemini chats still remain (${apiCount} in API, ${domRetry} in sidebar)`);
+    }
+  } catch (error) {
+    if (error.message?.includes("still remain")) throw error;
   }
 }
 
@@ -164,6 +169,8 @@ async function openSidebarOverflowForLink(link) {
 }
 
 async function deleteSidebarMenus(onProgress) {
+  await ensureGeminiRecentsExpanded();
+
   const estimated = Math.max(countGeminiSidebarChats(), listChatIdsFromDom().length, 1);
   let deleted = 0;
 
@@ -192,8 +199,12 @@ async function deleteSidebarMenus(onProgress) {
     if (!del) break;
 
     del.click();
-    await sleep(300);
+    await sleep(500);
     await confirmDialogs();
+    await waitFor(
+      () => findGeminiSidebarChatLinks().length < links.length || !document.body.contains(links[0]),
+      { timeout: 8000, interval: 400 }
+    );
     deleted++;
 
     report(onProgress, {
