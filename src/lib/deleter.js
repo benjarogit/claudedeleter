@@ -104,20 +104,26 @@ export async function tryResumeDelete(options = {}) {
 
   if (!provider.match(location.href)) return null;
 
-  await clearPending();
   report(ctx.onProgress, {
     type: "status",
     message: `${provider.name}: resuming after navigation…`,
     overall: 20,
   });
 
-  const result = await provider.deleteAll({
-    ...ctx,
-    step: pending.step,
-    resumeMethod: pending.method,
-  });
-
-  return beginPostVerify(ctx, provider, result);
+  try {
+    const result = await provider.deleteAll({
+      ...ctx,
+      step: pending.step,
+      resumeMethod: pending.method,
+    });
+    await clearPending();
+    return beginPostVerify(ctx, provider, result);
+  } catch (error) {
+    if (error instanceof NavigationResumeError) throw error;
+    await clearPending();
+    report(ctx.onProgress, { type: "error", message: error.message });
+    throw error;
+  }
 }
 
 /**

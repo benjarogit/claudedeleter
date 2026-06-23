@@ -188,6 +188,11 @@ async function deleteMyActivityDom(ctx) {
     location.hostname === "myactivity.google.com" && location.pathname.includes("/product/gemini");
 
   if (!onMyActivity && ctx.step !== "myactivity-delete") {
+    report(ctx.onProgress, {
+      type: "status",
+      message: "Gemini: opening My Activity…",
+      overall: 15,
+    });
     await navigateTo(MYACTIVITY_URL, {
       providerId: "gemini",
       step: "myactivity-delete",
@@ -196,10 +201,13 @@ async function deleteMyActivityDom(ctx) {
     });
   }
 
-  await sleep(1500);
+  const ready = await waitFor(() => !!findMyActivityBulkDeleteDropdown(), {
+    timeout: 20000,
+    interval: 500,
+  });
+  if (!ready) throw new Error("My Activity bulk delete dropdown not found");
 
   const deleteDropdown = findMyActivityBulkDeleteDropdown();
-  if (!deleteDropdown) throw new Error("My Activity bulk delete dropdown not found");
   deleteDropdown.click();
   await sleep(700);
 
@@ -243,6 +251,61 @@ async function deleteMyActivityDom(ctx) {
   return { deleted: "all", total: "all" };
 }
 
+function geminiHasSidebarTargets() {
+  return (
+    countGeminiSidebarChats() > 0 ||
+    listChatIdsFromDom().length > 0 ||
+    findGeminiSidebarOverflowButtons().length > 0
+  );
+}
+
+function buildGeminiMethods(ctx) {
+  const onGemini = location.hostname === "gemini.google.com";
+  const onMyActivity =
+    location.hostname === "myactivity.google.com" && location.pathname.includes("/product/gemini");
+
+  if (ctx.step === "myactivity-delete" || onMyActivity) {
+    return [
+      { name: "dom-myactivity", step: "myactivity-delete", fn: () => deleteMyActivityDom(ctx) },
+    ];
+  }
+
+  const methods = [];
+
+  if (onGemini && geminiHasSidebarTargets()) {
+    methods.push({
+      name: "dom-sidebar",
+      step: null,
+      fn: async () => {
+        const r = await deleteSidebarMenus(ctx.onProgress);
+        await assertGeminiGone();
+        return r;
+      },
+    });
+  }
+
+  methods.push({
+    name: "api-batchexecute",
+    step: null,
+    fn: () => {
+      report(ctx.onProgress, {
+        type: "status",
+        message: "Gemini: deleting via API…",
+        overall: 12,
+      });
+      return deleteAllApi(ctx.onProgress, ctx.delayMs);
+    },
+  });
+
+  methods.push({
+    name: "dom-myactivity",
+    step: "myactivity-delete",
+    fn: () => deleteMyActivityDom(ctx),
+  });
+
+  return methods;
+}
+
 export const geminiProvider = {
   id: "gemini",
   name: "Gemini",
@@ -263,26 +326,7 @@ export const geminiProvider = {
       return { ...(await deleteMyActivityDom(ctx)), method: "dom-myactivity", provider: "gemini" };
     }
 
-    const result = await tryMethods(
-      [
-        { name: "dom-myactivity", step: "myactivity-delete", fn: () => deleteMyActivityDom(ctx) },
-        {
-          name: "api-batchexecute",
-          step: null,
-          fn: () => deleteAllApi(ctx.onProgress, ctx.delayMs),
-        },
-        {
-          name: "dom-sidebar",
-          step: null,
-          fn: async () => {
-            const r = await deleteSidebarMenus(ctx.onProgress);
-            await assertGeminiGone();
-            return r;
-          },
-        },
-      ],
-      ctx
-    );
+    const result = await tryMethods(buildGeminiMethods(ctx), ctx);
 
     return { ...result, provider: "gemini" };
   },

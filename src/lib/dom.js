@@ -350,11 +350,13 @@ export function findMyActivityConfirmDelete() {
 
 export function countGeminiSidebarChats(root = document) {
   const ids = new Set();
-  const nav =
-    root.querySelector('nav[aria-label*="Seitliche" i]') ||
-    root.querySelector('nav[aria-label*="Sidebar" i]') ||
+  const scope =
+    root.querySelector('nav[aria-label*="Seitliche" i], nav[aria-label*="Sidebar" i]') ||
+    root.querySelector(
+      '[role="navigation"][aria-label*="Seitliche" i], [role="navigation"][aria-label*="Sidebar" i]'
+    ) ||
     root;
-  for (const a of nav.querySelectorAll('a[href*="/app/"]')) {
+  for (const a of scope.querySelectorAll('a[href*="/app/"]')) {
     const match = a.href.match(/\/app\/([a-zA-Z0-9_-]+)/);
     if (!match) continue;
     const raw = match[1];

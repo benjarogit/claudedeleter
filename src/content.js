@@ -37,6 +37,14 @@ async function runDelete(options = {}) {
   });
 }
 
+function resumeDelete() {
+  return tryResumeDelete({ onProgress: wireProgress() }).catch((error) => {
+    if (error?.name === "NavigationResumeError") return;
+    console.error("[ACC] resume", error);
+    sendRuntimeMessage({ action: "error", error: error.message });
+  });
+}
+
 onRuntimeMessage((request, _sender, sendResponse) => {
   if (request.action === "deleteAll") {
     runDelete();
@@ -45,10 +53,10 @@ onRuntimeMessage((request, _sender, sendResponse) => {
   }
 
   if (request.action === "checkResume") {
-    tryResumeDelete({ onProgress: wireProgress() });
+    resumeDelete();
     sendResponse({ ok: true });
     return true;
   }
 });
 
-tryResumeDelete({ onProgress: wireProgress() });
+resumeDelete();
