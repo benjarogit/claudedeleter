@@ -6,6 +6,7 @@ import {
   ensureGeminiRecentsExpanded,
   findGeminiSidebarChatLinks,
   findGeminiSidebarOverflowButtons,
+  revealGeminiOverflowForLink,
   findMyActivityBulkDeleteDropdown,
   findMyActivityConfirmDelete,
   findMyActivityItemDeleteButton,
@@ -144,28 +145,7 @@ async function listChatIds() {
 }
 
 async function openSidebarOverflowForLink(link) {
-  const row =
-    link.closest('[role="listitem"]') ||
-    link.closest("li") ||
-    link.parentElement?.parentElement ||
-    link.parentElement;
-  for (const el of [row, link]) {
-    el?.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
-    el?.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
-  }
-  await sleep(250);
-
-  const inRow = row
-    ? [...row.querySelectorAll("button")].filter((b) => {
-        const aria = b.getAttribute("aria-label") || "";
-        return /(?:more|weitere)\s+options?\s+(?:for|für)\s+/i.test(aria);
-      })
-    : [];
-
-  if (inRow.length) return inRow[0];
-
-  const menus = findGeminiSidebarOverflowButtons();
-  return menus[0] ?? null;
+  return revealGeminiOverflowForLink(link);
 }
 
 async function deleteSidebarMenus(onProgress) {

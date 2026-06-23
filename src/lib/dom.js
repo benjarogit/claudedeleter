@@ -280,6 +280,35 @@ export function findGeminiSidebarChatLinks(root = document) {
   return scoped.length ? scoped : collect(root);
 }
 
+/** Row wrapper for a Gemini sidebar chat link (GEM-NAV-LIST-ITEM). */
+export function findGeminiChatRow(link) {
+  if (!link) return null;
+  return (
+    link.closest("GEM-NAV-LIST-ITEM") ||
+    link.closest("gem-nav-list-item") ||
+    link.closest('[role="listitem"]') ||
+    link.closest("li") ||
+    link.parentElement
+  );
+}
+
+/** Hover-reveal overflow ⋮ for one sidebar chat row. */
+export async function revealGeminiOverflowForLink(link) {
+  const row = findGeminiChatRow(link);
+  link.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+  link.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+  row?.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+  await sleep(250);
+
+  if (row) {
+    const inRow = [...row.querySelectorAll("button")].filter((b) =>
+      CLAUDE_OVERFLOW_ARIA.test(b.getAttribute("aria-label") || "")
+    );
+    if (inRow.length) return inRow[0];
+  }
+  return findGeminiSidebarOverflowButtons()[0] ?? null;
+}
+
 export async function ensureGeminiRecentsExpanded() {
   const btn = [...document.querySelectorAll("button")].find((b) => {
     const label = `${b.getAttribute("aria-label") || ""} ${b.textContent || ""}`.toLowerCase();
