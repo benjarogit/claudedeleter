@@ -180,27 +180,6 @@ async function main() {
   await buildConsole();
 
   writeFileSync(
-    join(dist, "AMO-README.txt"),
-    [
-      "Mozilla AMO upload — acc-firefox.zip",
-      "",
-      "Upload: acc-firefox.zip (or acc-firefox.xpi — identical)",
-      "Check: Firefox AND Firefox for Android",
-      "",
-      "Manifest must include gecko.data_collection_permissions.",
-      "ACC uses required: [\"none\"] — no data sent to the developer.",
-      "New add-on ID: aichatcleaner@sunnyc.de",
-      "(If you started an upload with the old ID, cancel and upload as new add-on.)",
-      "",
-      "Source code (bundled JS):",
-      "  https://github.com/benjarogit/ai-chat-cleaner",
-      "  npm ci && npm run build",
-      "",
-      "Author: Sunny C. — https://sunnyc.de",
-    ].join("\n") + "\n"
-  );
-
-  writeFileSync(
     join(dist, "MOBILE-README.txt"),
     [
       "Mobile extension support",
