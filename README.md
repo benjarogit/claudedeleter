@@ -8,7 +8,7 @@
 [![Firefox AMO](https://img.shields.io/amo/v/ai-chat-cleaner1?label=Firefox%20AMO)](https://addons.mozilla.org/en-US/firefox/addon/ai-chat-cleaner1/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**Bulk-delete all your AI chat history — one click, 20 platforms.**
+**Bulk-delete all your AI chat history — one click, 21 platforms.**
 
 [Deutsch](README.de.md) · [Releases](https://github.com/benjarogit/ai-chat-cleaner/releases) · [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/ai-chat-cleaner1/) · [Sunny C.](https://sunnyc.de)
 
@@ -16,7 +16,7 @@ Open-source browser extension (MIT). Delete every conversation on supported AI s
 
 ---
 
-## Supported sites (20)
+## Supported sites (21)
 
 | Platform | URL |
 |----------|-----|
@@ -40,6 +40,7 @@ Open-source browser extension (MIT). Delete every conversation on supported AI s
 | CrewAI | [app.crewai.com/studio/v2](https://app.crewai.com/studio/v2) |
 | MiniMax | [agent.minimax.io](https://agent.minimax.io) |
 | Z.ai | [chat.z.ai](https://chat.z.ai) |
+| Cursor | [cursor.com/agents](https://cursor.com/agents) |
 
 > **Suno** deletes library clips/songs, not chat threads. **CrewAI** deletes Studio automation projects.
 
@@ -141,6 +142,10 @@ Artifacts in `dist/`: `acc-firefox.zip`, `acc-firefox.xpi`, `acc-chrome.zip`, `a
 See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ---
+
+## Built with Cursor
+
+This project was built entirely with **[Cursor](https://cursor.com/referral?code=UW6WJZLB8ECL)** — the AI-first code editor. If you're a developer looking for a smarter coding workflow, Cursor offers a **50 % discount** via the link above.
 
 ## Credits
 

@@ -1588,6 +1588,66 @@ export function countZaiSidebarChats(root = document) {
   ].filter((el) => isVisible(el)).length;
 }
 
+// ─── Cursor Agents (cursor.com/agents) ───────────────────────────────────────
+
+/**
+ * Returns all visible agent thread links from the Cursor sidebar.
+ * Each link carries a `data-composer-id` attribute (format: `bc-{uuid}`).
+ *
+ * @param {Document} root
+ * @returns {HTMLAnchorElement[]}
+ */
+export function findCursorAgentLinks(root = document) {
+  return [...root.querySelectorAll("a[data-composer-id]")].filter((el) =>
+    isVisible(el)
+  );
+}
+
+/**
+ * Returns the number of visible agent threads in the Cursor sidebar.
+ *
+ * @param {Document} root
+ * @returns {number}
+ */
+export function countCursorAgentThreads(root = document) {
+  return findCursorAgentLinks(root).length;
+}
+
+/**
+ * Returns all `bcId` values from visible Cursor agent thread links.
+ *
+ * @param {Document} root
+ * @returns {string[]}
+ */
+export function readCursorBcIds(root = document) {
+  return findCursorAgentLinks(root)
+    .map((a) => a.dataset.composerId)
+    .filter(Boolean);
+}
+
+/**
+ * Clicks the "Archive" button for each visible agent thread via the sidebar.
+ * Used as a DOM fallback when the API is unavailable.
+ *
+ * @param {Function} [onProgress]
+ * @returns {Promise<number>} Number of threads archived.
+ */
+export async function deleteCursorViaSidebar(onProgress) {
+  let deleted = 0;
+  for (let i = 0; i < 200; i++) {
+    // Archive buttons are rendered next to each thread link
+    const btn = [...document.querySelectorAll("button")].find(
+      (b) => isVisible(b) && /^archive$/i.test(b.textContent.trim())
+    );
+    if (!btn) break;
+    btn.click();
+    await sleep(400);
+    deleted++;
+    onProgress?.(deleted, Math.max(deleted, 1));
+  }
+  return deleted;
+}
+
 export async function deleteZaiViaSidebar(onProgress) {
   let deleted = 0;
   for (let i = 0; i < 150; i++) {

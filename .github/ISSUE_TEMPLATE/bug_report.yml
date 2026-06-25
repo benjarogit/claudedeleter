@@ -42,6 +42,7 @@ body:
         - CrewAI (app.crewai.com)
         - MiniMax (agent.minimax.io)
         - Z.ai (chat.z.ai)
+        - Cursor (cursor.com/agents)
         - Other / not listed
     validations:
       required: true

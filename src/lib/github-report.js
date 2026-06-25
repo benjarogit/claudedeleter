@@ -25,6 +25,7 @@ const PLATFORM_LABELS = {
   kagi: "Kagi Assistant (assistant.kagi.com)",
   minimax: "MiniMax (agent.minimax.io)",
   zai: "Z.ai (chat.z.ai)",
+  cursor: "Cursor (cursor.com/agents)",
 };
 
 /**

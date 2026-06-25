@@ -55,7 +55,8 @@
     "https://agent.minimax.io/*",
     "https://matrix.minimax.io/*",
     "https://chat.z.ai/*",
-    "https://api.z.ai/*"
+    "https://api.z.ai/*",
+    "https://cursor.com/*"
   ],
   "content_scripts": [
     {
@@ -83,7 +84,8 @@
         "https://app.crewai.com/*",
         "https://assistant.kagi.com/*",
         "https://agent.minimax.io/*",
-        "https://chat.z.ai/*"
+        "https://chat.z.ai/*",
+        "https://cursor.com/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"

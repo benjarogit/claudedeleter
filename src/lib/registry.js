@@ -1,6 +1,7 @@
 /** @file Provider registry — URL matching and site labels. */
 
 import { agentGptProvider } from "./providers/agentgpt.js";
+import { cursorProvider } from "./providers/cursor.js";
 import { chatgptProvider } from "./providers/chatgpt.js";
 import { claudeProvider } from "./providers/claude.js";
 import { copilotGithubProvider } from "./providers/copilot-github.js";
@@ -43,6 +44,7 @@ export const providers = [
   kagiProvider,
   minimaxProvider,
   zaiProvider,
+  cursorProvider,
 ];
 
 /** @param {string} url @returns {object|null} Provider descriptor or null. */
@@ -78,5 +80,6 @@ export function supportedSitesLabel() {
     "Kagi Assistant",
     "MiniMax",
     "Z.ai",
+    "Cursor",
   ].join(", ");
 }
