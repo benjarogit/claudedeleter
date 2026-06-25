@@ -3,7 +3,7 @@
   "name": "AI Chat Cleaner",
   "short_name": "ACC",
   "version": "1.0.1",
-  "description": "Bulk-delete chats on 18 AI platforms — Claude, ChatGPT, Gemini, Grok, Copilot, DeepSeek, Perplexity, Mistral, Poe, Kagi & more",
+  "description": "Bulk-delete chats on 20 AI platforms — Claude, ChatGPT, Gemini, Grok, Copilot, DeepSeek, Perplexity, Mistral, Poe, Kagi & more",
   "author": "Sunny C.",
   "homepage_url": "https://sunnyc.de",
   "icons": {
@@ -51,7 +51,11 @@
     "https://agentgpt.reworkd.ai/*",
     "https://platform.reworkd.dev/*",
     "https://app.crewai.com/*",
-    "https://assistant.kagi.com/*"
+    "https://assistant.kagi.com/*",
+    "https://agent.minimax.io/*",
+    "https://matrix.minimax.io/*",
+    "https://chat.z.ai/*",
+    "https://api.z.ai/*"
   ],
   "content_scripts": [
     {
@@ -77,7 +81,9 @@
         "https://suno.com/*",
         "https://agentgpt.reworkd.ai/*",
         "https://app.crewai.com/*",
-        "https://assistant.kagi.com/*"
+        "https://assistant.kagi.com/*",
+        "https://agent.minimax.io/*",
+        "https://chat.z.ai/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"

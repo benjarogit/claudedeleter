@@ -278,6 +278,69 @@
     return R;
   }
 
+  if (host === "agent.minimax.io") {
+    const token = localStorage.getItem("_token");
+    R.hasToken = !!token;
+    const hdr = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+    // Try to list chat sessions
+    const listResp = await fetch("/matrix/api/v1/chat/list?pageSize=50", {
+      credentials: "include",
+      headers: hdr,
+    });
+    R.listStatus = listResp.status;
+    if (listResp.ok) {
+      const data = await listResp.json().catch(() => null);
+      const sessions = data?.sessions || data?.chats || data?.list || data?.data || [];
+      R.apiListCount = Array.isArray(sessions) ? sessions.length : -1;
+      R.apiIds = Array.isArray(sessions)
+        ? sessions.map((s) => s.chatId || s.sessionId || s.id).filter(Boolean)
+        : [];
+    } else {
+      R.apiListCount = -1;
+      R.apiNote = "API returned " + listResp.status + " — may need different path";
+    }
+    R.domCount = document.querySelectorAll('nav a[href*="/task/"], nav a[href*="/chat/"], aside a[href*="/task/"]').length;
+    return R;
+  }
+
+  if (host === "chat.z.ai") {
+    const token = localStorage.getItem("token");
+    R.hasToken = !!token;
+    const hdr = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+    // Try to list conversations
+    let listed = false;
+    for (const path of ["/v1/conversations?page=0&size=50", "/zhipu-api/v1/conversations"]) {
+      const listResp = await fetch(path, { credentials: "include", headers: hdr });
+      R.listStatus = listResp.status;
+      const ct = listResp.headers.get("content-type") || "";
+      if (listResp.ok && ct.includes("json")) {
+        const data = await listResp.json().catch(() => null);
+        const items = data?.conversations || data?.data || data?.list || data?.items || [];
+        R.apiListCount = Array.isArray(items) ? items.length : -1;
+        R.apiIds = Array.isArray(items)
+          ? items.map((c) => c.id || c.conversationId).filter(Boolean)
+          : [];
+        R.apiPath = path;
+        listed = true;
+        break;
+      }
+    }
+    if (!listed) {
+      R.apiNote = "No JSON conversation list endpoint found — DOM-based only";
+      R.apiListCount = -1;
+    }
+    R.domCount = document.querySelectorAll('nav a[href*="/chat/"], aside a[href*="/chat/"], [data-conversation-id]').length;
+    return R;
+  }
+
   R.error = "unsupported host";
   return R;
 })();

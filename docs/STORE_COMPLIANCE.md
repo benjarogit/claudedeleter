@@ -16,7 +16,7 @@ References:
 
 ## AMO listing text (copy when uploading)
 
-**Summary:** Bulk-delete AI chat history on 18 platforms — one click, local only, no tracking.
+**Summary:** Bulk-delete AI chat history on 20 platforms — one click, local only, no tracking.
 
 **Permissions:** Host access to supported AI sites so ACC can call each site's delete API or UI on your command. No data sent to Sunny C. or third parties except optional GitHub bug reports you trigger.
 

@@ -1494,3 +1494,138 @@ export async function deleteCrewAiViaProjectMenu(onProgress) {
   }
   return deleted;
 }
+
+// ─── MiniMax Agent (agent.minimax.io) ────────────────────────────────────────
+
+export function findMinimaxSidebarTaskLinks(root = document) {
+  // New agent mode: task items in the Recents section of the sidebar
+  return [
+    ...root.querySelectorAll(
+      'nav a[href*="/agent/chat/"], nav a[href*="/task/"], aside a[href*="/task/"], aside a[href*="/chat/"]'
+    ),
+    ...root.querySelectorAll('[data-testid*="task"], [data-testid*="chat-item"]'),
+  ].filter((el) => isVisible(el));
+}
+
+export function countMinimaxSidebarTasks(root = document) {
+  const links = findMinimaxSidebarTaskLinks(root);
+  if (links.length) return links.length;
+  // Fallback: count any visible sidebar list items
+  return [
+    ...root.querySelectorAll('aside li, nav li, [role="listitem"]'),
+  ].filter(
+    (el) =>
+      isVisible(el) &&
+      el.querySelector("a") &&
+      /chat|task|session/i.test(el.querySelector("a")?.getAttribute("href") || "")
+  ).length;
+}
+
+export async function deleteMinimaxViaSidebar(onProgress) {
+  let deleted = 0;
+  for (let i = 0; i < 150; i++) {
+    const items = findMinimaxSidebarTaskLinks();
+    if (!items.length) break;
+
+    const item = items[0];
+    const row = item.closest("li") ?? item.parentElement;
+    if (row) {
+      row.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+      row.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    }
+    item.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    await sleep(250);
+
+    // Try right-click context menu or overflow button
+    const moreBtn = row
+      ? (row.querySelector('button[aria-label*="more"], button[aria-haspopup="menu"]') ??
+          queryClickables(row).find((b) => /^(more|⋯|…|\.\.\.)$/i.test(elementText(b).trim())))
+      : null;
+
+    if (moreBtn) {
+      moreBtn.click();
+      await sleep(300);
+    } else {
+      item.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true }));
+      await sleep(300);
+    }
+
+    const delBtn = queryClickables().find(
+      (b) => isVisible(b) && /^(delete|remove|löschen|删除)$/i.test(elementText(b).trim())
+    );
+    if (!delBtn) break;
+    delBtn.click();
+    await sleep(300);
+    await confirmDialogs();
+    deleted++;
+    onProgress?.(deleted, Math.max(deleted, 1));
+    await sleep(500);
+  }
+  return deleted;
+}
+
+// ─── Z.ai / ChatGLM (chat.z.ai) ──────────────────────────────────────────────
+
+export function findZaiSidebarChatLinks(root = document) {
+  return [
+    ...root.querySelectorAll(
+      'nav a[href*="/chat/"], aside a[href*="/chat/"], [data-testid*="conversation"]'
+    ),
+    ...root.querySelectorAll("nav li a, aside li a").filter
+      ? [...root.querySelectorAll("nav li a, aside li a")].filter((a) =>
+          /\/chat\/|\/c\//.test(a.href)
+        )
+      : [],
+  ].filter((el) => isVisible(el));
+}
+
+export function countZaiSidebarChats(root = document) {
+  const links = findZaiSidebarChatLinks(root);
+  if (links.length) return links.length;
+  // Fallback: any sidebar list with timestamp or date headings = chat list
+  return [
+    ...root.querySelectorAll('nav li[data-id], aside li[data-id], [data-conversation-id]'),
+  ].filter((el) => isVisible(el)).length;
+}
+
+export async function deleteZaiViaSidebar(onProgress) {
+  let deleted = 0;
+  for (let i = 0; i < 150; i++) {
+    const items = findZaiSidebarChatLinks();
+    if (!items.length) break;
+
+    const item = items[0];
+    const row = item.closest("li") ?? item.parentElement;
+    if (row) {
+      row.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+      row.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    }
+    item.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    await sleep(250);
+
+    const moreBtn = row
+      ? (row.querySelector('button[aria-label*="more"], button[aria-haspopup], [class*="more"]') ??
+          queryClickables(row).find((b) => /^(more|⋯|…|\.\.\.)$/i.test(elementText(b).trim())))
+      : null;
+
+    if (moreBtn) {
+      moreBtn.click();
+      await sleep(300);
+    } else {
+      item.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true }));
+      await sleep(300);
+    }
+
+    const delBtn = queryClickables().find(
+      (b) => isVisible(b) && /^(delete|remove|löschen|删除)$/i.test(elementText(b).trim())
+    );
+    if (!delBtn) break;
+    delBtn.click();
+    await sleep(300);
+    await confirmDialogs();
+    deleted++;
+    onProgress?.(deleted, Math.max(deleted, 1));
+    await sleep(500);
+  }
+  return deleted;
+}

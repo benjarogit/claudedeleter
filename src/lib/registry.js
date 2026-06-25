@@ -13,11 +13,13 @@ import { grokXProvider } from "./providers/grok-x.js";
 import { kagiProvider } from "./providers/kagi.js";
 import { manusProvider } from "./providers/manus.js";
 import { metaAiProvider } from "./providers/meta-ai.js";
+import { minimaxProvider } from "./providers/minimax.js";
 import { mistralProvider } from "./providers/mistral.js";
 import { perplexityProvider } from "./providers/perplexity.js";
 import { piProvider } from "./providers/pi.js";
 import { poeProvider } from "./providers/poe.js";
 import { sunoProvider } from "./providers/suno.js";
+import { zaiProvider } from "./providers/zai.js";
 
 /** All supported AI chat providers (order = fallback priority). */
 export const providers = [
@@ -39,6 +41,8 @@ export const providers = [
   agentGptProvider,
   crewAiProvider,
   kagiProvider,
+  minimaxProvider,
+  zaiProvider,
 ];
 
 /** @param {string} url @returns {object|null} Provider descriptor or null. */
@@ -72,5 +76,7 @@ export function supportedSitesLabel() {
     "AgentGPT",
     "CrewAI",
     "Kagi Assistant",
+    "MiniMax",
+    "Z.ai",
   ].join(", ");
 }

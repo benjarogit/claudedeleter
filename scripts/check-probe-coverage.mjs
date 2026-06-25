@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Verify e2e-probe + live-probe cover all 18 registry providers. */
+/** Verify e2e-probe + live-probe cover all 20 registry providers. */
 import { readFileSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -25,14 +25,16 @@ const SITES = [
   { id: "agentgpt", host: "agentgpt.reworkd.ai", script: "live-probe-new-sites.js" },
   { id: "crewai", host: "app.crewai.com", script: "live-probe-new-sites.js" },
   { id: "kagi", host: "assistant.kagi.com", script: "live-probe-new-sites.js" },
+  { id: "minimax", host: "agent.minimax.io", script: "live-probe-new-sites.js" },
+  { id: "zai", host: "chat.z.ai", script: "live-probe-new-sites.js" },
 ];
 
 const e2e = readFileSync(join(root, "scripts/e2e-probe.js"), "utf8");
 const live = readFileSync(join(root, "scripts/live-probe-new-sites.js"), "utf8");
 const providerFiles = readdirSync(join(root, "src/lib/providers")).filter((f) => f.endsWith(".js"));
 
-if (providerFiles.length !== SITES.length) {
-  console.error(`Expected ${SITES.length} sites, registry has ${providerFiles.length} files`);
+if (providerFiles.length !== 20) {
+  console.error(`Expected 20 provider files, found ${providerFiles.length}`);
   process.exit(1);
 }
 
@@ -47,7 +49,7 @@ for (const site of SITES) {
 
 if (!ok) process.exit(1);
 
-console.log("Probe coverage OK: all 18 providers have in-page probe scripts.");
+console.log("Probe coverage OK: all 20 providers have in-page probe scripts.");
 console.log("\nRun Phase 2A (logged-in DevTools on each site):");
 for (const site of SITES) {
   const url = `https://${site.host}${site.path || ""}`;

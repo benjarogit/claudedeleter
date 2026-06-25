@@ -40,6 +40,8 @@ body:
         - Manus (manus.im)
         - AgentGPT (agentgpt.reworkd.ai)
         - CrewAI (app.crewai.com)
+        - MiniMax (agent.minimax.io)
+        - Z.ai (chat.z.ai)
         - Other / not listed
     validations:
       required: true

@@ -13,8 +13,8 @@ function read(path) {
 
 const registry = read("src/lib/registry.js");
 const providerCount = (registry.match(/Provider,/g) || []).length;
-if (providerCount !== 18) {
-  errors.push(`Expected 18 providers in registry, found ${providerCount}`);
+if (providerCount !== 20) {
+  errors.push(`Expected 20 providers in registry, found ${providerCount}`);
 }
 
 for (const manifest of ["manifests/chrome.json", "manifests/firefox.json"]) {
@@ -27,9 +27,21 @@ for (const manifest of ["manifests/chrome.json", "manifests/firefox.json"]) {
   if (!hosts.includes("assistant.kagi.com")) {
     errors.push(`${manifest}: missing assistant.kagi.com host_permissions`);
   }
+  if (!hosts.includes("agent.minimax.io")) {
+    errors.push(`${manifest}: missing agent.minimax.io host_permissions`);
+  }
+  if (!hosts.includes("chat.z.ai")) {
+    errors.push(`${manifest}: missing chat.z.ai host_permissions`);
+  }
   const matches = JSON.stringify(json.content_scripts);
   if (!matches.includes("assistant.kagi.com")) {
     errors.push(`${manifest}: missing assistant.kagi.com content_scripts`);
+  }
+  if (!matches.includes("agent.minimax.io")) {
+    errors.push(`${manifest}: missing agent.minimax.io content_scripts`);
+  }
+  if (!matches.includes("chat.z.ai")) {
+    errors.push(`${manifest}: missing chat.z.ai content_scripts`);
   }
 }
 
@@ -57,8 +69,8 @@ if (!bugTpl.includes("Kagi Assistant")) {
 
 const providersDir = join(root, "src/lib/providers");
 const providerFiles = readdirSync(providersDir).filter((f) => f.endsWith(".js"));
-if (providerFiles.length !== 18) {
-  errors.push(`Expected 18 provider files, found ${providerFiles.length}`);
+if (providerFiles.length !== 20) {
+  errors.push(`Expected 20 provider files, found ${providerFiles.length}`);
 }
 
 if (errors.length) {
@@ -66,4 +78,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log("Validation OK: 18 providers, v1.0.1, Kagi in manifests, CWS description ≤132.");
+console.log("Validation OK: 20 providers, v1.0.1, Kagi+MiniMax+Z.ai in manifests, CWS description ≤132.");

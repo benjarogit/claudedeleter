@@ -8,7 +8,7 @@
 [![Firefox AMO](https://img.shields.io/amo/v/ai-chat-cleaner1?label=Firefox%20AMO)](https://addons.mozilla.org/en-US/firefox/addon/ai-chat-cleaner1/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**Bulk-delete all your AI chat history — one click, 18 platforms.**
+**Bulk-delete all your AI chat history — one click, 20 platforms.**
 
 [Deutsch](README.de.md) · [Releases](https://github.com/benjarogit/ai-chat-cleaner/releases) · [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/ai-chat-cleaner1/) · [Sunny C.](https://sunnyc.de)
 
@@ -38,6 +38,8 @@ Open-source browser extension (MIT). Delete every conversation on supported AI s
 | Manus | [manus.im/app](https://manus.im/app) |
 | AgentGPT | [agentgpt.reworkd.ai](https://agentgpt.reworkd.ai) |
 | CrewAI | [app.crewai.com/studio/v2](https://app.crewai.com/studio/v2) |
+| MiniMax | [agent.minimax.io](https://agent.minimax.io) |
+| Z.ai | [chat.z.ai](https://chat.z.ai) |
 
 > **Suno** deletes library clips/songs, not chat threads. **CrewAI** deletes Studio automation projects.
 
@@ -88,7 +90,7 @@ If deletion fails, use **Copy debug report** or **Report on GitHub** in the popu
 
 ## Support the project
 
-ACC is free and open source. Optional support helps maintenance across 18 platforms:
+ACC is free and open source. Optional support helps maintenance across 20 platforms:
 
 - [Ko-fi](https://ko-fi.com/aichatcleaner) — one-time tips
 - [Patreon](https://www.patreon.com/SunnyCueq) — Supporter tier (3 €/month)
@@ -121,6 +123,8 @@ API-first on every platform; DOM fallbacks if the internal API is unavailable.
 | Manus | Connect-RPC DeleteSession | Sidebar |
 | AgentGPT | Sidebar | — |
 | CrewAI | DELETE projects | Studio menu |
+| MiniMax | REST API | Sidebar tasks |
+| Z.ai | REST API | Sidebar chats |
 
 ---
 

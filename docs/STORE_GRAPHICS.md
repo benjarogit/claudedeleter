@@ -22,7 +22,7 @@ Optional für AMO HiDPI: **96×96** und **32×32** im Manifest (noch nicht geset
 |-------|------|--------|---------|--------|
 | Extension icon | **128×128** | PNG | Ja (im ZIP) | ACC-Logo, klar bei 16px |
 | Screenshot | **1280×800** (oder 640×400) | PNG/JPEG | **Min. 1**, max. 5 | Popup auf AI-Site, Confirm-Dialog, leere History |
-| Small promo tile | **440×280** | PNG/JPEG | Ja (Dashboard-Upload) | Name + „18 AI platforms“ + Icon |
+| Small promo tile | **440×280** | PNG/JPEG | Ja (Dashboard-Upload) | Name + „20 AI platforms“ + Icon |
 | Marquee promo | **1400×560** | PNG/JPEG | Nein | Nur für Featured; optional |
 
 Design-Tipps CWS:

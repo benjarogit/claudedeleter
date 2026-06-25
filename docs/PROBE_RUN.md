@@ -9,7 +9,7 @@ Phase **2B**: ACC-Extension geladen, echte Delete-Methoden, 2 Test-Items pro Met
 
 ---
 
-## Phase 2A — Alle 18 Sites (≈30–45 Min)
+## Phase 2A — Alle 20 Sites (≈30–45 Min)
 
 1. `node scripts/check-probe-coverage.mjs` — listet URLs + Skripte
 2. Pro Site: **eingeloggt** Tab öffnen → DevTools (F12) → Console

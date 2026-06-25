@@ -16,7 +16,7 @@ First public SemVer release. Supersedes the pre-release `v2.0.0` tag.
 
 ### Added
 
-- Support for **18 platforms** including Kagi Assistant (`assistant.kagi.com`).
+- Support for **20 platforms** including Kagi Assistant (`assistant.kagi.com`).
 - Popup **DE/EN** localization via `navigator.language`.
 - GitHub issue form prefill (`fields[debug_report]`, platform, surface).
 - Console script debug report + GitHub link on failure.

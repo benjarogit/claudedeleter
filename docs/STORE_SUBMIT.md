@@ -18,15 +18,15 @@ Graphics: `assets/store-graphics/` — see [STORE_GRAPHICS.md](./STORE_GRAPHICS.
 
 **Short description (≤132 chars):**
 ```
-Bulk-delete chats on 18 AI platforms — Claude, ChatGPT, Gemini, Grok, Copilot, DeepSeek, Perplexity, Poe, Kagi & more
+Bulk-delete chats on 20 AI platforms — Claude, ChatGPT, Gemini, Grok, Copilot, DeepSeek, Perplexity, Poe, Kagi & more
 ```
 
 **Full description (EN):**
 ```
-AI Chat Cleaner (ACC) — Bulk-delete your chat history across 18 AI platforms with a single click.
+AI Chat Cleaner (ACC) — Bulk-delete your chat history across 20 AI platforms with a single click.
 
 Supported platforms:
-Claude · ChatGPT · Gemini · Grok · Grok on X · DeepSeek · Perplexity · GitHub Copilot · Microsoft Copilot · Mistral · Pi · Meta AI · Poe · Suno · Manus · AgentGPT · CrewAI · Kagi Assistant
+Claude · ChatGPT · Gemini · Grok · Grok on X · DeepSeek · Perplexity · GitHub Copilot · Microsoft Copilot · Mistral · Pi · Meta AI · Poe · Suno · Manus · AgentGPT · CrewAI · Kagi Assistant · MiniMax · Z.ai
 
 How it works:
 1. Navigate to a supported AI chat site (while logged in)
@@ -51,15 +51,15 @@ Notes:
 
 **Kurzbeschreibung (≤132 Zeichen):**
 ```
-Chats auf 18 KI-Plattformen massenweise löschen — Claude, ChatGPT, Gemini, Grok, Copilot, DeepSeek, Perplexity, Poe, Kagi & mehr
+Chats auf 20 KI-Plattformen massenweise löschen — Claude, ChatGPT, Gemini, Grok, Copilot, DeepSeek, Perplexity, Poe, Kagi & mehr
 ```
 
 **Vollständige Beschreibung (DE):**
 ```
-AI Chat Cleaner (ACC) — Lösche deinen gesamten Chat-Verlauf auf 18 KI-Plattformen mit einem einzigen Klick.
+AI Chat Cleaner (ACC) — Lösche deinen gesamten Chat-Verlauf auf 20 KI-Plattformen mit einem einzigen Klick.
 
 Unterstützte Plattformen:
-Claude · ChatGPT · Gemini · Grok · Grok on X · DeepSeek · Perplexity · GitHub Copilot · Microsoft Copilot · Mistral · Pi · Meta AI · Poe · Suno · Manus · AgentGPT · CrewAI · Kagi Assistant
+Claude · ChatGPT · Gemini · Grok · Grok on X · DeepSeek · Perplexity · GitHub Copilot · Microsoft Copilot · Mistral · Pi · Meta AI · Poe · Suno · Manus · AgentGPT · CrewAI · Kagi Assistant · MiniMax · Z.ai
 
 So funktioniert es:
 1. Öffne eine unterstützte KI-Chat-Seite (eingeloggt)

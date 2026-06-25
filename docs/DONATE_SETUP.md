@@ -19,7 +19,7 @@
 
 1. Creator page: **SunnyCueq** — https://www.patreon.com/SunnyCueq
 2. Tier: **Supporter** — 3 €/month
-3. About: bulk-delete on 18 AI platforms, MIT, no tracking
+3. About: bulk-delete on 20 AI platforms, MIT, no tracking
 4. Links: GitHub releases, AMO listing
 5. **Publish** the page when tier is ready
 
