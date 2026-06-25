@@ -1,3 +1,14 @@
+/**
+ * @file Poe provider — deletes chats on poe.com.
+ *
+ * Deletion strategy:
+ *  1. dom-sidebar — History page, "More actions" → "Delete chat" → Confirm
+ *
+ * Note: GraphQL API calls (mutation deleteBotConversation) return a Cloudflare
+ * challenge page, making API-based deletion unfeasible. The History page uses a
+ * virtualized list; hover events must be dispatched to reveal hidden action buttons.
+ */
+
 import {
   clickEachMoreDelete,
   countPoeSidebarChats,

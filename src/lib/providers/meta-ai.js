@@ -1,3 +1,13 @@
+/**
+ * @file Meta AI provider — deletes conversations on meta.ai.
+ *
+ * Deletion strategy:
+ *  1. dom-sidebar — sidebar "More options" → Delete → Confirm (hover-reveal pattern)
+ *
+ * Note: No public REST API available. The sidebar uses a contenteditable div
+ * for input and hover-triggered overflow buttons requiring CSS manipulation.
+ */
+
 import {
   countMetaAiSidebarChats,
   deleteMetaAiViaMoreOptions,

@@ -1,3 +1,14 @@
+/**
+ * @file Pi provider — deletes conversations on pi.ai.
+ *
+ * Deletion strategy (in order):
+ *  1. api-individual — DELETE /api/conversations/{sid} (session-cookie auth)
+ *  2. dom-sidebar    — sidebar conversation options → Delete (DOM fallback)
+ *
+ * Auth: Session cookies only; the `sid` field in conversation objects
+ * serves as the path parameter (not a UUID, may be a numeric string).
+ */
+
 import {
   confirmDialogs,
   countPiSidebarChats,

@@ -1,3 +1,15 @@
+/**
+ * @file Manus provider — deletes sessions on manus.im/app.
+ *
+ * Deletion strategy (in order):
+ *  1. api-individual — Connect-RPC manus.api.TaskService/DeleteTask
+ *  2. dom-sidebar    — aria-haspopup overflow reveal → Delete → Confirm dialog
+ *
+ * Note: The `session_id` cookie is HttpOnly, making it inaccessible from JavaScript.
+ * Connect-RPC calls therefore result in 401 errors unless the token can be captured
+ * via network interception. The DOM fallback is the default reliable method.
+ */
+
 import {
   clickEachMoreDelete,
   confirmDialogs,

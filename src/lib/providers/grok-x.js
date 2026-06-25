@@ -1,3 +1,14 @@
+/**
+ * @file Grok X provider — deletes conversations on x.com/i/grok.
+ *
+ * Deletion strategy (in order):
+ *  1. dom-history  — X sidebar history panel, per-item delete (Cloudflare blocks GraphQL API)
+ *  2. dom-settings — Settings → "Delete all Grok data" (navigation required)
+ *
+ * Note: Direct GraphQL API calls to x.com return a Cloudflare challenge page,
+ * making API-based deletion unfeasible. DOM methods are the only reliable approach.
+ */
+
 import {
   clickEachTrash,
   clickKeywords,

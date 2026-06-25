@@ -202,3 +202,22 @@ footer a:hover {
   color: var(--accent);
   text-decoration: underline;
 }
+
+.lang-toggle {
+  width: auto;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+.lang-toggle:hover {
+  background: var(--border);
+  color: var(--text);
+}

@@ -1,3 +1,12 @@
+/**
+ * @file Claude provider — deletes conversations on claude.ai.
+ *
+ * Deletion strategy (in order):
+ *  1. dom-recents    — /recents bulk-select → "Delete all" button (fastest)
+ *  2. api            — DELETE /api/organizations/{orgId}/chat_conversations/{chatId}
+ *  3. dom-overflow   — sidebar ⋮ → Delete per conversation (DOM fallback)
+ */
+
 import {
   clickClaudeOverflowDeletes,
   claudeRecentsSelectAll,

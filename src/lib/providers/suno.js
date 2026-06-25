@@ -1,3 +1,15 @@
+/**
+ * @file Suno provider — deletes audio clips on suno.com.
+ *
+ * Deletion strategy (in order):
+ *  1. api-individual — POST /api/gen/trash with clip IDs (Clerk Bearer auth)
+ *  2. dom-library    — library clip menu → Trash per item (DOM fallback)
+ *
+ * Note: Suno uses Clerk for authentication (window.Clerk.session.getToken).
+ * Each "song creation" generates 2 clips (variants), so creation counts are doubled.
+ * "Trashing" moves clips to trash; the API endpoint uses the studio-api-prod subdomain.
+ */
+
 import {
   confirmDialogs,
   countSunoLibraryClips,

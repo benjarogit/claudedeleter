@@ -1,3 +1,13 @@
+/**
+ * @file CrewAI provider — deletes crew projects on app.crewai.com.
+ *
+ * Deletion strategy (in order):
+ *  1. api-individual — DELETE /studio/v2/projects/{id} (CSRF token + session cookie)
+ *  2. dom-studio     — project card ⋮ → Delete project (DOM fallback)
+ *
+ * Auth: CSRF token from <meta name="csrf-token"> + session cookies.
+ */
+
 import {
   clickEachMoreDelete,
   confirmDialogs,

@@ -1,3 +1,13 @@
+/**
+ * @file Mistral provider — deletes chats on chat.mistral.ai.
+ *
+ * Deletion strategy (in order):
+ *  1. api-individual — tRPC mutation chat.delete (POST /api/trpc/chat.delete)
+ *  2. dom-sidebar    — sidebar ⋮ → Delete per chat (DOM fallback)
+ *
+ * Auth: Session cookies (tRPC requires no explicit token, uses Mistral session).
+ */
+
 import {
   confirmDialogs,
   countMistralSidebarChats,

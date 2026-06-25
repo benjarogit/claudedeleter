@@ -1,3 +1,13 @@
+/**
+ * @file AgentGPT provider — deletes agents on agentgpt.reworkd.ai.
+ *
+ * Deletion strategy (in order):
+ *  1. dom-sidebar — sidebar per-agent delete button (tRPC API Cloudflare-protected)
+ *
+ * Note: tRPC mutation agent.deleteById is blocked by Cloudflare when called directly.
+ * The "Deploy" button on the creation form requires both name AND task fields to be filled.
+ */
+
 import {
   clickEachMoreDelete,
   clickEachTrash,

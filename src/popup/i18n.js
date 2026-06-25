@@ -1,4 +1,14 @@
-/** @file Popup UI strings (English / German). */
+/**
+ * @file Popup UI strings — English / German.
+ *
+ * Language resolution order:
+ *  1. localStorage key `acc-lang` (manual user override)
+ *  2. navigator.language (browser locale)
+ *  3. fallback: "en"
+ */
+
+/** Supported locale codes. */
+export const LOCALES = /** @type {const} */ (["en", "de"]);
 
 const STRINGS = {
   en: {
@@ -33,6 +43,7 @@ const STRINGS = {
     errorNoTab: "No active tab.",
     errorUnreachable: (msg) =>
       `Page script unreachable: ${msg}. Reload the tab and try again.`,
+    langToggle: "DE",
   },
   de: {
     subtitle: "KI-Chat-Verlauf massenhaft löschen",
@@ -66,19 +77,47 @@ const STRINGS = {
     errorNoTab: "Kein aktiver Tab.",
     errorUnreachable: (msg) =>
       `Seiten-Skript nicht erreichbar: ${msg}. Tab neu laden und erneut versuchen.`,
+    langToggle: "EN",
   },
 };
 
-/** @returns {"en"|"de"} */
+/**
+ * Returns the active locale, checking manual override first.
+ *
+ * @returns {"en"|"de"}
+ */
 export function pickLocale() {
   try {
+    const saved = localStorage.getItem("acc-lang");
+    if (saved === "de" || saved === "en") return saved;
     return navigator.language?.toLowerCase().startsWith("de") ? "de" : "en";
   } catch {
     return "en";
   }
 }
 
-/** @param {"en"|"de"} [locale] */
+/**
+ * Persists a manual locale preference.
+ *
+ * @param {"en"|"de"} locale
+ * @returns {void}
+ */
+export function setLocale(locale) {
+  try {
+    if (locale === "de" || locale === "en") {
+      localStorage.setItem("acc-lang", locale);
+    }
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+/**
+ * Returns the string map for the given locale.
+ *
+ * @param {"en"|"de"} [locale]
+ * @returns {typeof STRINGS["en"]}
+ */
 export function t(locale = pickLocale()) {
   return STRINGS[locale] ?? STRINGS.en;
 }

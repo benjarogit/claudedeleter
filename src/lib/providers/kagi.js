@@ -1,3 +1,11 @@
+/**
+ * @file Kagi provider — deletes conversations on assistant.kagi.com.
+ *
+ * Deletion strategy (in order):
+ *  1. api-individual — DELETE /api/conversations/{id} (session-cookie auth)
+ *  2. dom-sidebar    — sidebar ⋮ → Delete per conversation (DOM fallback)
+ */
+
 import {
   countKagiSidebarChats,
   deleteKagiViaSidebar,

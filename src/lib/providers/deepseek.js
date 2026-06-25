@@ -1,3 +1,14 @@
+/**
+ * @file DeepSeek provider — deletes conversations on chat.deepseek.com.
+ *
+ * Deletion strategy (in order):
+ *  1. api-bulk       — POST /api/v0/chat_session/delete_all (single request)
+ *  2. api-individual — POST /api/v0/chat_session/delete per session
+ *  3. dom-sidebar    — sidebar context menu fallback
+ *
+ * Auth: JWT stored in localStorage as JSON under key "userToken" → .value.
+ */
+
 import {
   countDeepseekSidebarChats,
   deleteDeepseekViaSidebar,

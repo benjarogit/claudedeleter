@@ -1,3 +1,13 @@
+/**
+ * @file Microsoft Copilot provider — deletes chats on copilot.microsoft.com.
+ *
+ * Deletion strategy:
+ *  1. dom-sidebar — "View options" → Delete per chat
+ *
+ * Note: No stable REST API found; CORS prevents direct API calls from extension context.
+ * DOM-based deletion is the only reliable method.
+ */
+
 import {
   countCopilotMicrosoftSidebarChats,
   deleteCopilotMicrosoftViaSidebar,

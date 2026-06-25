@@ -16,7 +16,7 @@ Open-source browser extension (MIT). Delete every conversation on supported AI s
 
 ---
 
-## Supported sites (18)
+## Supported sites (20)
 
 | Platform | URL |
 |----------|-----|
@@ -105,26 +105,26 @@ API-first on every platform; DOM fallbacks if the internal API is unavailable.
 
 | Platform | Primary | Fallback |
 |----------|---------|----------|
-| Claude | Recents bulk select → API | Overflow menu |
+| Claude | Recents bulk select | API → Overflow menu |
 | ChatGPT | Settings bulk delete | Per-chat API → Sidebar |
-| Gemini | Sidebar | batchexecute API → My Activity |
+| Gemini | batchexecute API | Sidebar → My Activity |
 | Grok.com | Bulk API | Individual API → History UI |
-| Grok on X | History DOM | GraphQL → Settings |
+| Grok on X | History DOM | Settings (delete all) |
 | DeepSeek | Bulk API | Individual API → Sidebar |
-| Perplexity | Individual API | Sidebar Session actions |
+| Perplexity | Individual API | Sidebar session actions |
 | GitHub Copilot | Bulk API | Individual API → Manage chat |
-| Microsoft Copilot | Individual API | Sidebar |
+| Microsoft Copilot | Sidebar DOM | — |
 | Mistral | tRPC chat.delete | Sidebar |
 | Pi | REST DELETE | Conversation options |
 | Meta AI | Sidebar More options | — |
-| Poe | Sidebar | — |
-| Kagi Assistant | Sidebar | — |
-| Suno | Clip API | Library menu |
-| Manus | Connect-RPC DeleteSession | Sidebar |
-| AgentGPT | Sidebar | — |
-| CrewAI | DELETE projects | Studio menu |
-| MiniMax | REST API | Sidebar tasks |
-| Z.ai | REST API | Sidebar chats |
+| Poe | History page DOM | — |
+| Kagi Assistant | REST DELETE | Sidebar |
+| Suno | Clip API (Clerk auth) | Library menu |
+| Manus | Connect-RPC (if auth) | Sidebar DOM |
+| AgentGPT | Sidebar DOM | — |
+| CrewAI | REST DELETE projects | Studio menu |
+| MiniMax | REST API | Sidebar DOM |
+| Z.ai | REST DELETE | Sidebar DOM |
 
 ---
 

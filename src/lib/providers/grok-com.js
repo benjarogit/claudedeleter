@@ -1,3 +1,14 @@
+/**
+ * @file Grok.com provider — deletes conversations on grok.com.
+ *
+ * Deletion strategy (in order):
+ *  1. api-bulk       — DELETE /rest/app-chat/conversations/delete-all (single request)
+ *  2. api-individual — DELETE /rest/app-chat/conversations/{id}
+ *  3. dom-history    — history panel ⋮ → Delete per item (DOM fallback)
+ *
+ * Auth: Bearer token from the app's XHR/fetch requests (captured in-page).
+ */
+
 import {
   clickEachMoreDelete,
   clickEachTrash,

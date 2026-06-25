@@ -1,3 +1,12 @@
+/**
+ * @file ChatGPT provider — deletes conversations on chatgpt.com.
+ *
+ * Deletion strategy (in order):
+ *  1. dom-settings   — Settings → "Delete all conversations" (bulk, fastest)
+ *  2. api-individual — PATCH /backend-api/conversation/{id} {is_visible: false}
+ *  3. dom-sidebar    — sidebar ⋮ → Delete per conversation (DOM fallback)
+ */
+
 import {
   confirmDialogs,
   countChatGptNavChats,

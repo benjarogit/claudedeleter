@@ -1,3 +1,11 @@
+/**
+ * @file MiniMax Agent provider — deletes tasks/sessions on agent.minimax.io.
+ *
+ * Deletion strategy (in order):
+ *  1. api-individual  — POST /matrix/api/v1/chat/delete per session (requires localStorage._token)
+ *  2. dom-sidebar     — Ant Design dropdown reveal + confirm dialog click
+ */
+
 import {
   confirmDialogs,
   countMinimaxSidebarTasks,
@@ -8,6 +16,11 @@ import { runDeleteLoop } from "../shared.js";
 
 const ORIGIN = "https://agent.minimax.io";
 
+/**
+ * Reads the JWT from localStorage set by the MiniMax web app.
+ *
+ * @returns {string|null} Bearer token or null when unauthenticated.
+ */
 function getToken() {
   try {
     return localStorage.getItem("_token") || null;
@@ -16,6 +29,12 @@ function getToken() {
   }
 }
 
+/**
+ * Builds the common fetch headers including optional Bearer auth.
+ *
+ * @param {string|null} token
+ * @returns {Record<string, string>}
+ */
 function authHeaders(token) {
   return {
     Accept: "application/json",
@@ -24,12 +43,16 @@ function authHeaders(token) {
   };
 }
 
-/** Try to list chat session IDs via /matrix/api/v1 (requires auth). */
+/**
+ * Lists all chat/task session IDs via the MiniMax REST API.
+ *
+ * @param {typeof fetch} fetchFn - Injected fetch (allows mocking in tests).
+ * @returns {Promise<string[]|null>} Array of session IDs or null on auth failure.
+ */
 async function listChatIds(fetchFn) {
   const token = getToken();
   if (!token) return null;
 
-  // MiniMax agent uses /matrix/api/v1/chat — list sessions with pagination
   const response = await fetchFn(`${ORIGIN}/matrix/api/v1/chat/list?pageSize=100`, {
     credentials: "include",
     headers: authHeaders(token),
@@ -45,6 +68,13 @@ async function listChatIds(fetchFn) {
     : null;
 }
 
+/**
+ * Throws if any sessions remain after deletion (API or DOM count).
+ *
+ * @param {typeof fetch} fetchFn
+ * @returns {Promise<void>}
+ * @throws {Error} When sessions still remain.
+ */
 async function assertGone(fetchFn) {
   let apiCount = null;
   try {
@@ -63,6 +93,14 @@ async function assertGone(fetchFn) {
   }
 }
 
+/**
+ * Deletes all sessions one by one via the MiniMax REST API.
+ *
+ * @param {typeof fetch} fetchFn
+ * @param {Function} onProgress
+ * @param {number} delayMs
+ * @returns {Promise<{deleted: number, total: number}>}
+ */
 async function deleteAllOneByOne(fetchFn, onProgress, delayMs) {
   const token = getToken();
   if (!token) throw new Error("MiniMax _token not found — reload and log in");
@@ -94,6 +132,13 @@ async function deleteAllOneByOne(fetchFn, onProgress, delayMs) {
   return result;
 }
 
+/**
+ * Deletes all visible tasks via the sidebar Ant Design dropdown.
+ *
+ * @param {typeof fetch} fetchFn
+ * @param {Function} onProgress
+ * @returns {Promise<{deleted: number, total: number}>}
+ */
 async function deleteSidebarDom(fetchFn, onProgress) {
   const count = countMinimaxSidebarTasks();
   if (!findMinimaxSidebarTaskLinks().length) return { deleted: 0, total: 0 };
@@ -105,11 +150,17 @@ async function deleteSidebarDom(fetchFn, onProgress) {
   return { deleted, total: Math.max(count, deleted) };
 }
 
-/** ACC delete provider (public API). */
-
+/** ACC delete provider — MiniMax Agent (agent.minimax.io). */
 export const minimaxProvider = {
   id: "minimax",
   name: "MiniMax",
+
+  /**
+   * Returns true when the active URL is the MiniMax Agent app.
+   *
+   * @param {string} url
+   * @returns {boolean}
+   */
   match(url) {
     try {
       return new URL(url).hostname === "agent.minimax.io";
@@ -118,7 +169,14 @@ export const minimaxProvider = {
     }
   },
 
-  /** api-individual → dom-sidebar */
+  /**
+   * Returns available deletion methods in priority order:
+   *  1. api-individual (fastest, uses REST API)
+   *  2. dom-sidebar    (fallback, Ant Design dropdown interaction)
+   *
+   * @param {import("../deleter.js").DeleteContext} ctx
+   * @returns {Promise<import("../deleter.js").DeleteMethod[]>}
+   */
   async getDeleteMethods(ctx) {
     let apiIds = null;
     try {
@@ -150,6 +208,12 @@ export const minimaxProvider = {
     return methods;
   },
 
+  /**
+   * Verifies that no sessions remain; throws if any are found.
+   *
+   * @param {import("../deleter.js").DeleteContext} ctx
+   * @returns {Promise<void>}
+   */
   async verifyGone(ctx) {
     await assertGone(ctx.fetchFn);
   },

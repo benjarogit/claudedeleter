@@ -4,19 +4,19 @@
   <img src="assets/acc-logo.png" alt="AI Chat Cleaner Logo" width="128" height="128">
 </p>
 
-[![Release](https://img.shields.io/github/v/release/benjarogit/ai-chat-cleaner?label=Release)](https://github.com/benjarogit/ai-chat-cleaner/releases)
+[![Release](https://img.shields.io/github/v/release/benjarogit/ai-chat-cleaner?label=release)](https://github.com/benjarogit/ai-chat-cleaner/releases)
 [![Firefox AMO](https://img.shields.io/amo/v/ai-chat-cleaner1?label=Firefox%20AMO)](https://addons.mozilla.org/de/firefox/addon/ai-chat-cleaner1/)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-blue.svg)](LICENSE)
 
-**KI-Chat-Verlauf massenhaft löschen — ein Klick, 18 Plattformen.**
+**KI-Chat-Verlauf massenweise löschen — ein Klick, 20 Plattformen.**
 
 [English](README.md) · [Releases](https://github.com/benjarogit/ai-chat-cleaner/releases) · [Firefox Add-ons](https://addons.mozilla.org/de/firefox/addon/ai-chat-cleaner1/) · [Sunny C.](https://sunnyc.de)
 
-Open-Source-Browsererweiterung (MIT). Alle Unterhaltungen auf unterstützten KI-Seiten löschen, ohne jeden Chat einzeln anzuklicken.
+Open-Source-Browser-Erweiterung (MIT). Löscht alle Unterhaltungen auf unterstützten KI-Seiten — ohne jeden Chat einzeln anzuklicken.
 
 ---
 
-## Unterstützte Seiten (18)
+## Unterstützte Plattformen (20)
 
 | Plattform | URL |
 |-----------|-----|
@@ -38,6 +38,8 @@ Open-Source-Browsererweiterung (MIT). Alle Unterhaltungen auf unterstützten KI-
 | Manus | [manus.im/app](https://manus.im/app) |
 | AgentGPT | [agentgpt.reworkd.ai](https://agentgpt.reworkd.ai) |
 | CrewAI | [app.crewai.com/studio/v2](https://app.crewai.com/studio/v2) |
+| MiniMax | [agent.minimax.io](https://agent.minimax.io) |
+| Z.ai | [chat.z.ai](https://chat.z.ai) |
 
 > **Suno** löscht Bibliotheks-Clips/Songs, keine Chat-Threads. **CrewAI** löscht Studio-Automatisierungsprojekte.
 
@@ -47,13 +49,13 @@ Open-Source-Browsererweiterung (MIT). Alle Unterhaltungen auf unterstützten KI-
 
 ### Firefox (Desktop & Android)
 
-| Methode | Für wen | Link |
-|---------|---------|------|
-| **Add-ons for Firefox (AMO)** | Die meisten Nutzer — Auto-Updates | [Bei AMO installieren](https://addons.mozilla.org/de/firefox/addon/ai-chat-cleaner1/) |
-| **GitHub Release (.xpi)** | Sideload | [acc-firefox.xpi](https://github.com/benjarogit/ai-chat-cleaner/releases/latest) |
+| Methode | Empfohlen für | Link |
+|---------|---------------|------|
+| **Add-ons für Firefox (AMO)** | Die meisten Nutzer — automatische Updates | [Auf AMO installieren](https://addons.mozilla.org/de/firefox/addon/ai-chat-cleaner1/) |
+| **GitHub Release (.xpi)** | Sideloading | [acc-firefox.xpi](https://github.com/benjarogit/ai-chat-cleaner/releases/latest) |
 | **Entpackt laden** | Entwickler | `npm ci && npm run build` → `dist/firefox/` in `about:debugging` |
 
-**Android:** Installation über AMO oder Sideload der `.xpi`.
+**Android:** Über AMO installieren oder `.xpi` sideloaden.
 
 ### Chrome / Edge
 
@@ -62,40 +64,71 @@ Open-Source-Browsererweiterung (MIT). Alle Unterhaltungen auf unterstützten KI-
 
 ### Ohne Erweiterung (Bookmarklet / Konsole)
 
-[`acc-console.js`](https://github.com/benjarogit/ai-chat-cleaner/releases/latest) in die DevTools-Konsole einfügen. GitHub Copilot funktioniert ohne Erweiterung (iframe-fetch-Bypass).
+[`acc-console.js`](https://github.com/benjarogit/ai-chat-cleaner/releases/latest) in den DevTools auf einer unterstützten Seite einfügen, oder `dist/bookmarklet.txt` verwenden.
+
+GitHub Copilot funktioniert auch über die Konsole/Bookmarklet (iframe-Fetch-Bypass) — keine Erweiterung nötig.
 
 ---
 
-## Nutzung
+## Verwendung
 
-1. Unterstützte Seite öffnen und **einloggen**.
-2. **ACC** klicken → **Alle Chats löschen** → bestätigen.
-3. Tab offen lassen, bis die Fortschrittsanzeige fertig ist.
+1. Eine unterstützte Seite öffnen und **einloggen**.
+2. Auf **ACC** → **Alle Chats löschen** klicken → bestätigen.
+3. Tab geöffnet lassen, bis der Fortschrittsbalken fertig ist.
 
-Bei Fehlern: **Debug-Bericht kopieren** oder **Auf GitHub melden** im Popup. Berichte sind geschwärzt (keine Tokens, E-Mails oder Chat-IDs).
+Bei Fehlern: **Debug-Bericht kopieren** oder **Auf GitHub melden** im Popup verwenden. Berichte werden lokal geschwärzt (keine Tokens, E-Mails oder Chat-IDs).
 
 ---
 
 ## Datenschutz
 
-- **Keine Datensammlung** — nichts wird automatisch an den Entwickler gesendet.
-- Löschungen laufen **nur in deinem Browser** auf den jeweiligen Seiten.
-- Debug-Berichte entstehen nur bei Kopieren/Melden eines Fehlers und werden lokal geschwärzt.
+- **Keine Datenerhebung** — es wird nichts automatisch an den Entwickler gesendet.
+- Löschvorgänge laufen **nur im Browser** auf den jeweiligen Seiten.
+- Debug-Berichte werden nur erstellt, wenn du einen Fehler kopierst oder meldest — sensible Werte werden lokal geschwärzt.
 
 ---
 
 ## Projekt unterstützen
 
-ACC ist kostenlos und Open Source. Optionale Unterstützung hilft bei der Pflege von 18 Plattformen:
+ACC ist kostenlos und Open Source. Optionale Unterstützung hilft, 20 Plattformen aktuell zu halten:
 
-- [Ko-fi](https://ko-fi.com/aichatcleaner) — Einmal-Spenden
-- [Patreon](https://www.patreon.com/SunnyCueq) — Supporter-Stufe (3 €/Monat)
+- [Ko-fi](https://ko-fi.com/aichatcleaner) — Einmalige Unterstützung
+- [Patreon](https://www.patreon.com/SunnyCueq) — Supporter-Tier (3 €/Monat)
 
-Fehler und Ideen: [GitHub Issues](https://github.com/benjarogit/ai-chat-cleaner/issues).
+Fehlerberichte und Feature-Ideen: [GitHub Issues](https://github.com/benjarogit/ai-chat-cleaner/issues).
 
 ---
 
-## Build aus Quellcode
+## Funktionsweise
+
+API-first auf jeder Plattform; DOM-Fallbacks wenn die interne API nicht verfügbar ist.
+
+| Plattform | Primär | Fallback |
+|-----------|--------|---------|
+| Claude | Recents-Massenauswahl | API → Overflow-Menü |
+| ChatGPT | Einstellungen Alle löschen | Per-Chat-API → Sidebar |
+| Gemini | batchexecute API | Sidebar → Meine Aktivitäten |
+| Grok.com | Bulk-API | Einzel-API → Verlaufs-UI |
+| Grok auf X | Verlaufs-DOM | Einstellungen (Alle löschen) |
+| DeepSeek | Bulk-API | Einzel-API → Sidebar |
+| Perplexity | Einzel-API | Sidebar-Sitzungsaktionen |
+| GitHub Copilot | Bulk-API | Einzel-API → Chat verwalten |
+| Microsoft Copilot | Sidebar-DOM | — |
+| Mistral | tRPC chat.delete | Sidebar |
+| Pi | REST DELETE | Unterhaltungsoptionen |
+| Meta AI | Sidebar Weitere Optionen | — |
+| Poe | Verlaufsseite DOM | — |
+| Kagi Assistant | REST DELETE | Sidebar |
+| Suno | Clip-API (Clerk-Auth) | Bibliotheksmenü |
+| Manus | Connect-RPC (wenn Auth) | Sidebar-DOM |
+| AgentGPT | Sidebar-DOM | — |
+| CrewAI | REST DELETE Projekte | Studio-Menü |
+| MiniMax | REST-API | Sidebar-DOM |
+| Z.ai | REST DELETE | Sidebar-DOM |
+
+---
+
+## Aus dem Quellcode bauen
 
 ```bash
 git clone https://github.com/benjarogit/ai-chat-cleaner.git
@@ -105,7 +138,7 @@ npm ci && npm run build
 
 Artefakte in `dist/`: `acc-firefox.zip`, `acc-firefox.xpi`, `acc-chrome.zip`, `acc-edge.zip`, `acc-console.js`.
 
-Siehe [CHANGELOG.md](CHANGELOG.md).
+Versionsverlauf: [CHANGELOG.md](CHANGELOG.md).
 
 ---
 

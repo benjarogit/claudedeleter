@@ -1,3 +1,15 @@
+/**
+ * @file GitHub Copilot provider — deletes chat threads on github.com/copilot.
+ *
+ * Deletion strategy (in order):
+ *  1. api-bulk       — DELETE /copilot_internal/user/threads (single request)
+ *  2. api-individual — DELETE /copilot_internal/user/threads/{id}
+ *  3. dom-sidebar    — "Manage chat" → Delete per thread (DOM fallback)
+ *
+ * Note: API base URL is extracted from an inline <script> tag (apiURL field).
+ * Auth: GitHub session cookies; no explicit token needed.
+ */
+
 import {
   countCopilotGithubSidebarChats,
   deleteCopilotGithubViaManageChat,

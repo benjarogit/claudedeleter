@@ -1,3 +1,13 @@
+/**
+ * @file Perplexity provider — deletes threads on perplexity.ai.
+ *
+ * Deletion strategy (in order):
+ *  1. api-individual — DELETE /rest/thread/delete_thread_by_entry_uuid
+ *  2. dom-sidebar    — sidebar session-actions menu per thread (DOM fallback)
+ *
+ * Auth: Session cookies (no explicit token required — credentials: include).
+ */
+
 import {
   confirmDialogs,
   countPerplexitySidebarChats,

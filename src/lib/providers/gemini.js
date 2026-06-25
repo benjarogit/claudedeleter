@@ -1,3 +1,12 @@
+/**
+ * @file Gemini provider — deletes conversations on gemini.google.com.
+ *
+ * Deletion strategy (in order):
+ *  1. api-batchexecute — Google internal batchexecute RPC (bulk, fastest)
+ *  2. dom-sidebar      — sidebar overflow menus, one by one
+ *  3. dom-myactivity   — myactivity.google.com bulk delete (navigation required)
+ */
+
 import {
   clickKeywords,
   confirmDialogs,
@@ -319,14 +328,7 @@ export const geminiProvider = {
 
     const methods = [];
 
-    if (onGemini && geminiHasSidebarTargets()) {
-      methods.push({
-        name: "dom-sidebar",
-        step: null,
-        fn: () => deleteSidebarMenus(ctx.onProgress),
-      });
-    }
-
+    // Best method first: Google's internal batchexecute API deletes all at once
     methods.push({
       name: "api-batchexecute",
       step: null,
@@ -340,6 +342,16 @@ export const geminiProvider = {
       },
     });
 
+    // Fallback 1: DOM sidebar (one-by-one, works on gemini.google.com)
+    if (onGemini && geminiHasSidebarTargets()) {
+      methods.push({
+        name: "dom-sidebar",
+        step: null,
+        fn: () => deleteSidebarMenus(ctx.onProgress),
+      });
+    }
+
+    // Fallback 2: myactivity.google.com bulk delete (requires navigation)
     methods.push({
       name: "dom-myactivity",
       step: "myactivity-delete",

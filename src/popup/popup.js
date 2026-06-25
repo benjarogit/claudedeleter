@@ -1,7 +1,7 @@
 import { deleteAllChats, detectProvider, isSupportedUrl, supportedSitesLabel } from "../lib/deleter.js";
 import { ext, getActiveTab, onRuntimeMessage, sendTabMessage } from "../lib/api.js";
 import { buildGithubBugUrl } from "../lib/github-report.js";
-import { pickLocale, t } from "./i18n.js";
+import { pickLocale, setLocale, t } from "./i18n.js";
 
 function detectExtensionSurface() {
   try {
@@ -15,8 +15,8 @@ function detectExtensionSurface() {
 }
 
 const $ = (id) => document.getElementById(id);
-const locale = pickLocale();
-const i18n = t(locale);
+let locale = pickLocale();
+let i18n = t(locale);
 document.documentElement.lang = locale;
 
 const deleteButton = $("deleteAll");
@@ -40,6 +40,7 @@ const popupLog = [];
 let lastDebugReport = "";
 let activeProviderId = null;
 
+/** Renders all static UI strings for the active locale. */
 function applyStaticI18n() {
   $("subtitle").textContent = i18n.subtitle;
   deleteButton.textContent = i18n.deleteAll;
@@ -59,9 +60,19 @@ function applyStaticI18n() {
   $("footerSupport").textContent = i18n.footerSupport;
   $("footerKofi").textContent = i18n.footerKofi;
   $("footerPatreon").textContent = i18n.footerPatreon;
+  $("langToggle").textContent = i18n.langToggle;
 }
 
 applyStaticI18n();
+
+$("langToggle").addEventListener("click", () => {
+  locale = locale === "en" ? "de" : "en";
+  setLocale(locale);
+  i18n = t(locale);
+  document.documentElement.lang = locale;
+  applyStaticI18n();
+  init();
+});
 
 function accVersion() {
   try {
