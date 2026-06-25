@@ -1,11 +1,13 @@
 {
   "name": "ai-chat-cleaner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "AI Chat Cleaner (ACC) — bulk-delete AI chat history on 18 platforms",
   "type": "module",
   "scripts": {
-    "build": "node scripts/build.mjs"
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate-release.mjs",
+    "probe:coverage": "node scripts/check-probe-coverage.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.0"

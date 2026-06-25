@@ -91,7 +91,7 @@ If deletion fails, use **Copy debug report** or **Report on GitHub** in the popu
 ACC is free and open source. Optional support helps maintenance across 18 platforms:
 
 - [Ko-fi](https://ko-fi.com/aichatcleaner) — one-time tips
-- [Patreon](https://patreon.com/aichatcleaner) — Supporter tier (3 €/month)
+- [Patreon](https://www.patreon.com/SunnyCueq) — Supporter tier (3 €/month)
 
 Bug reports and feature ideas: [GitHub Issues](https://github.com/benjarogit/ai-chat-cleaner/issues).
 

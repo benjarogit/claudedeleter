@@ -92,7 +92,7 @@ function solidPng(width, height, r, g, b) {
 function writeIcons(dir) {
   mkdirSync(join(dir, "icons"), { recursive: true });
   const srcIcons = join(root, "src", "icons");
-  for (const size of [16, 48, 128]) {
+  for (const size of [16, 32, 48, 96, 128]) {
     const src = join(srcIcons, `icon-${size}.png`);
     const dest = join(dir, "icons", `icon-${size}.png`);
     if (existsSync(src)) {

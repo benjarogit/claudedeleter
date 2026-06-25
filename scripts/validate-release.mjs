@@ -19,7 +19,10 @@ if (providerCount !== 18) {
 
 for (const manifest of ["manifests/chrome.json", "manifests/firefox.json"]) {
   const json = JSON.parse(read(manifest));
-  if (json.version !== "1.0.0") errors.push(`${manifest}: version must be 1.0.0`);
+  if (json.version !== "1.0.1") errors.push(`${manifest}: version must be 1.0.1`);
+  if (manifest.includes("chrome") && json.description.length > 132) {
+    errors.push(`${manifest}: description ${json.description.length} chars (CWS max 132)`);
+  }
   const hosts = JSON.stringify(json.host_permissions);
   if (!hosts.includes("assistant.kagi.com")) {
     errors.push(`${manifest}: missing assistant.kagi.com host_permissions`);
@@ -63,4 +66,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log("Validation OK: 18 providers, v1.0.0, Kagi in manifests, URLs updated.");
+console.log("Validation OK: 18 providers, v1.0.1, Kagi in manifests, CWS description ≤132.");

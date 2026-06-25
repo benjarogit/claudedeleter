@@ -1,24 +1,26 @@
 # Ko-fi & Patreon setup (ACC v1.0.0)
 
-Placeholder URLs in popup/README until accounts are live:
+## Current URLs in popup/README
 
-- Ko-fi: https://ko-fi.com/aichatcleaner
-- Patreon: https://patreon.com/aichatcleaner (Supporter 3 €/month)
+| Service | URL | Status |
+|---------|-----|--------|
+| Ko-fi | https://ko-fi.com/aichatcleaner | Placeholder — finish Creator onboarding |
+| Patreon | https://www.patreon.com/SunnyCueq | Page exists — publish + add 3 € Supporter tier |
 
 ## Ko-fi checklist
 
 1. Account type: **Creator**
 2. Page name: **AI Chat Cleaner (ACC)**
-3. Enable one-time donations
+3. Enable one-time donations (**Receive tips**)
 4. Add GitHub + store links in bio
-5. Copy final page URL → update `src/popup/popup.html`, README.md, README.de.md
+5. If final URL differs from `aichatcleaner`, update `src/popup/popup.html`, README.md, README.de.md, rebuild
 
 ## Patreon checklist
 
-1. Create page for ACC
+1. Creator page: **SunnyCueq** — https://www.patreon.com/SunnyCueq
 2. Tier: **Supporter** — 3 €/month
 3. About: bulk-delete on 18 AI platforms, MIT, no tracking
 4. Links: GitHub releases, AMO listing
-5. Copy final URL → same files as above
+5. **Publish** the page when tier is ready
 
-After URLs are confirmed, run `npm run build` and optionally patch-release **1.0.1** if stores already shipped 1.0.0 with placeholders.
+After Ko-fi URL is confirmed, run `npm run build`. Optional patch **1.0.1** only if stores already shipped with a wrong link.

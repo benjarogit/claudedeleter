@@ -89,7 +89,7 @@ Bei Fehlern: **Debug-Bericht kopieren** oder **Auf GitHub melden** im Popup. Ber
 ACC ist kostenlos und Open Source. Optionale Unterstützung hilft bei der Pflege von 18 Plattformen:
 
 - [Ko-fi](https://ko-fi.com/aichatcleaner) — Einmal-Spenden
-- [Patreon](https://patreon.com/aichatcleaner) — Supporter-Stufe (3 €/Monat)
+- [Patreon](https://www.patreon.com/SunnyCueq) — Supporter-Stufe (3 €/Monat)
 
 Fehler und Ideen: [GitHub Issues](https://github.com/benjarogit/ai-chat-cleaner/issues).
 

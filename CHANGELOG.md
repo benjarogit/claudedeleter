@@ -2,6 +2,14 @@
 
 All notable changes to AI Chat Cleaner (ACC) are documented here.
 
+## [1.0.1] — 2026-06-25
+
+### Fixed
+
+- Chrome Web Store: manifest `description` shortened to **≤132 characters** (CWS reject at 145 chars).
+
+---
+
 ## [1.0.0] — 2026-06-23
 
 First public SemVer release. Supersedes the pre-release `v2.0.0` tag.
