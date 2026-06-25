@@ -355,16 +355,26 @@ export async function claudeRecentsSelectAll() {
 /** Enabled bulk-delete in recents toolbar (not overflow menuitem). */
 export function findClaudeRecentsBulkDelete() {
   const cancel = findToolbarButton(KW.cancel);
-  if (!cancel) return findToolbarButton(KW.delete);
 
-  const toolbar =
-    cancel.closest('[role="toolbar"]') ||
-    cancel.parentElement?.parentElement ||
-    document;
-  return queryClickables(toolbar).find((el) => {
+  // Search near cancel button first (most precise), then broader fallback
+  const searchRoot = cancel
+    ? (cancel.closest('[role="toolbar"]') || cancel.parentElement?.parentElement || document)
+    : document;
+
+  const inToolbar = queryClickables(searchRoot).find((el) => {
     if (el.disabled) return false;
     const hay = elementText(el);
     return KW.delete.some((k) => hay === norm(k) || hay.includes(norm(k)));
+  });
+  if (inToolbar) return inToolbar;
+
+  // Broader fallback: any delete-labelled button visible in the main content area
+  const main = document.querySelector('main, [role="main"]') || document;
+  return queryClickables(main).find((el) => {
+    if (el.disabled) return false;
+    const hay = elementText(el);
+    const aria = (el.getAttribute("aria-label") || "").toLowerCase();
+    return KW.delete.some((k) => hay.includes(norm(k)) || aria.includes(norm(k)));
   }) ?? null;
 }
 
@@ -586,19 +596,22 @@ export function findChatGptConversationOptionsButton(root = document) {
 /** Settings → Data controls bulk delete (hash #settings/DataControls is language-neutral). */
 export function findChatGptSettingsBulkDelete(root = document) {
   const dialog = root.querySelector('[role="dialog"]') || root;
+
   const byTestId = queryVisible(
     'button[data-testid*="delete-all" i], button[data-testid*="delete_all" i]',
     dialog
   )[0];
   if (byTestId) return byTestId;
 
+  // Search both aria-label and visible text content for broader compatibility
   return (
     queryVisible("button", dialog).find((b) => {
       const aria = (b.getAttribute("aria-label") || "").toLowerCase();
+      const text = elementText(b);
       if (CHATGPT_DELETE_ALL_ARIA.test(aria)) return true;
-      return KW.deleteAll.some(
-        (k) => aria.includes(norm(k)) && /chat|unterhaltung|conversation/.test(aria)
-      );
+      if (KW.deleteAll.some((k) => aria.includes(norm(k)) && /chat|unterhaltung|conversation/.test(aria))) return true;
+      // Also match by visible button text (ChatGPT changed from aria-label to text)
+      return KW.deleteAll.some((k) => text.includes(norm(k)));
     }) ?? null
   );
 }
@@ -689,13 +702,19 @@ export function countGrokComSidebarChats(root = document) {
   return findGrokComSidebarChatLinks(root).length;
 }
 
-/** Sidebar row ⋮ — aria "Optionen" / "Options" (revealed on hover). */
+/** Sidebar row ⋮ — aria "Optionen" / "Options" / "More" (revealed on hover). */
 export function findGrokComSidebarOptionsButton(row) {
   if (!row) return null;
   return (
     queryVisible("button", row).find((b) => {
       const aria = (b.getAttribute("aria-label") || "").trim();
-      return /^(optionen|options)$/i.test(aria);
+      const text = elementText(b);
+      return (
+        /^(optionen|options|more|mehr|⋯|…|\.\.\.)$/i.test(aria) ||
+        /^(optionen|options|more|mehr|⋯|…|\.\.\.)$/i.test(text) ||
+        b.getAttribute("aria-haspopup") === "menu" ||
+        b.getAttribute("aria-haspopup") === "true"
+      );
     }) ?? null
   );
 }
@@ -899,17 +918,29 @@ async function deleteViaSidebarMenu({
 }
 
 export function findCopilotMicrosoftChatLinks(root = document) {
-  const heading = [...root.querySelectorAll("h2")].find((el) =>
-    /our conversations together/i.test(el.textContent || "")
-  );
-  const list = heading?.parentElement?.querySelector('[role="list"]');
-  if (!list) return [];
-
-  const links = [];
   const seen = new Set();
-  for (const el of list.querySelectorAll('[role="link"]')) {
+  const links = [];
+
+  // Primary: known section heading "our conversations together"
+  const heading = [...root.querySelectorAll("h2, h3")].find((el) =>
+    /our conversations together|recent conversations|conversations/i.test(el.textContent || "")
+  );
+  const primaryList = heading?.parentElement?.querySelector('[role="list"]') ||
+    heading?.closest('section, [role="region"]')?.querySelector('[role="list"]');
+
+  const searchRoot = primaryList || root;
+
+  // Collect [role="link"] items; fallback to <a> links in nav/aside
+  const candidates = [
+    ...searchRoot.querySelectorAll('[role="link"]'),
+    ...root.querySelectorAll('nav a[href*="/"], aside a[href*="/"]'),
+  ];
+
+  for (const el of candidates) {
     const label = (el.getAttribute("aria-label") || el.textContent || "").trim();
+    // Filter out navigation links (Settings, Home, etc.)
     if (!label || seen.has(label) || !isVisible(el)) continue;
+    if (/^(settings|home|new chat|search|feedback|help|sign|log)/i.test(label)) continue;
     seen.add(label);
     links.push(el);
   }
@@ -1161,14 +1192,28 @@ export async function deleteMetaAiViaMoreOptions(onProgress) {
 export function findPoeSidebarChatLinks(root = document) {
   const seen = new Set();
   const links = [];
-  for (const row of root.querySelectorAll('li[class*="ChatHistoryListItem"]')) {
-    const link = row.querySelector('[role="link"]');
+
+  // Primary: known class pattern
+  for (const row of root.querySelectorAll('li[class*="ChatHistoryListItem"], li[class*="chatHistory"], li[class*="HistoryItem"]')) {
+    const link = row.querySelector('[role="link"], a[href]');
     const title =
-      row.querySelector('[class*="title"]')?.textContent?.trim() ||
+      row.querySelector('[class*="title"], [class*="Title"], [class*="name"], [class*="Name"]')?.textContent?.trim() ||
       link?.textContent?.trim().slice(0, 48);
     if (!title || seen.has(title) || !isVisible(row)) continue;
     seen.add(title);
     links.push(link || row);
+  }
+  if (links.length) return links;
+
+  // Fallback: conversation links in sidebar nav (poe.com/chat/...)
+  for (const a of root.querySelectorAll('a[href*="/chat/"], a[href*="/conversation/"]')) {
+    if (!isVisible(a)) continue;
+    const title = (a.textContent || a.getAttribute("aria-label") || "").trim().slice(0, 48);
+    if (!title || seen.has(title)) continue;
+    // Skip bot-related links (poe.com/ChatGPT etc.)
+    if (/^(chatgpt|claude|gemini|llama|gpt)/i.test(title)) continue;
+    seen.add(title);
+    links.push(a);
   }
   return links;
 }
@@ -1177,10 +1222,12 @@ export function countPoeSidebarChats(root = document) {
   return findPoeSidebarChatLinks(root).length;
 }
 
+const POE_HISTORY_ITEM_SEL = 'li[class*="ChatHistoryListItem"], li[class*="chatHistory"], li[class*="HistoryItem"]';
+
 /** Poe sidebar ⋮ — hover-hidden; revealed after row focus/enter. */
 async function ensurePoeSidebarOpen() {
-  const row = document.querySelector('li[class*="ChatHistoryListItem"]');
-  const link = row?.querySelector('[role="link"]');
+  const row = document.querySelector(POE_HISTORY_ITEM_SEL);
+  const link = row?.querySelector('[role="link"], a[href]');
   if (link && link.getBoundingClientRect().x >= 0) return;
 
   const toggle = queryClickables().find((el) =>
@@ -1192,8 +1239,8 @@ async function ensurePoeSidebarOpen() {
 
 async function wakePoeSidebarRowMenu(linkOrRow) {
   const row =
-    linkOrRow?.closest('li[class*="ChatHistoryListItem"]') ||
-    linkOrRow?.querySelector?.('[role="link"]')?.closest('li[class*="ChatHistoryListItem"]') ||
+    linkOrRow?.closest(POE_HISTORY_ITEM_SEL) ||
+    linkOrRow?.querySelector?.('[role="link"]')?.closest(POE_HISTORY_ITEM_SEL) ||
     linkOrRow;
   const link = row?.querySelector('[role="link"]') || linkOrRow;
   if (!row) return null;
@@ -1253,12 +1300,23 @@ export async function deletePoeViaSidebar(onProgress) {
 export function findSunoClipElements(root = document) {
   const clips = [];
   const seen = new Set();
+
+  // Primary: data-clip-status attribute (confirmed 2026)
+  for (const row of root.querySelectorAll('[data-clip-status="complete"], div.clip-row')) {
+    if (!isVisible(row) || seen.has(row)) continue;
+    seen.add(row);
+    clips.push(row);
+  }
+  if (clips.length) return clips;
+
+  // Fallback: find "More options" buttons and walk up to clip container
+  // aria-label="Play" now includes song name: "Play \"Song name\"" (starts-with selector)
   for (const more of root.querySelectorAll('button[aria-label="More options"]')) {
     if (!isVisible(more)) continue;
     let row = more.parentElement;
     for (let i = 0; i < 12 && row; i++) {
       if (
-        row.querySelector('button[aria-label="Play"]') &&
+        row.querySelector('button[aria-label^="Play"]') &&
         row.querySelector('button[aria-label="More options"]')
       ) {
         if (!seen.has(row)) {
@@ -1498,27 +1556,28 @@ export async function deleteCrewAiViaProjectMenu(onProgress) {
 // ─── MiniMax Agent (agent.minimax.io) ────────────────────────────────────────
 
 export function findMinimaxSidebarTaskLinks(root = document) {
-  // New agent mode: task items in the Recents section of the sidebar
-  return [
+  // Primary: sidebar cards confirmed by browser inspection (agent.minimax.io 2026)
+  const byTestId = [
+    ...root.querySelectorAll('[data-testid="sidebar-base-card"]'),
+  ].filter((el) => isVisible(el));
+  if (byTestId.length) return byTestId;
+
+  // Fallback: anchor-based links (older UI versions)
+  const byHref = [
     ...root.querySelectorAll(
       'nav a[href*="/agent/chat/"], nav a[href*="/task/"], aside a[href*="/task/"], aside a[href*="/chat/"]'
     ),
     ...root.querySelectorAll('[data-testid*="task"], [data-testid*="chat-item"]'),
   ].filter((el) => isVisible(el));
+  return byHref;
 }
 
 export function countMinimaxSidebarTasks(root = document) {
   const links = findMinimaxSidebarTaskLinks(root);
   if (links.length) return links.length;
-  // Fallback: count any visible sidebar list items
-  return [
-    ...root.querySelectorAll('aside li, nav li, [role="listitem"]'),
-  ].filter(
-    (el) =>
-      isVisible(el) &&
-      el.querySelector("a") &&
-      /chat|task|session/i.test(el.querySelector("a")?.getAttribute("href") || "")
-  ).length;
+  // Fallback: Ant Design dropdown triggers in sidebar (each represents a chat item)
+  return [...root.querySelectorAll('button.ant-dropdown-trigger')]
+    .filter((el) => isVisible(el)).length;
 }
 
 export async function deleteMinimaxViaSidebar(onProgress) {
@@ -1536,11 +1595,17 @@ export async function deleteMinimaxViaSidebar(onProgress) {
     item.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
     await sleep(250);
 
-    // Try right-click context menu or overflow button
-    const moreBtn = row
-      ? (row.querySelector('button[aria-label*="more"], button[aria-haspopup="menu"]') ??
-          queryClickables(row).find((b) => /^(more|⋯|…|\.\.\.)$/i.test(elementText(b).trim())))
-      : null;
+    // Primary: Ant Design dropdown trigger confirmed by browser inspection (2026)
+    const antDropdown =
+      (row || item).querySelector('button.ant-dropdown-trigger') ??
+      (row || item).closest('li, [role="listitem"]')?.querySelector('button.ant-dropdown-trigger');
+
+    const moreBtn = antDropdown ?? (
+      row
+        ? (row.querySelector('button[aria-label*="more"], button[aria-haspopup="menu"]') ??
+            queryClickables(row).find((b) => /^(more|⋯|…|\.\.\.)$/i.test(elementText(b).trim())))
+        : null
+    );
 
     if (moreBtn) {
       moreBtn.click();

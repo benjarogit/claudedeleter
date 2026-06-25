@@ -58,15 +58,10 @@ export const metaAiProvider = {
     }
   },
 
-  /** Live: dom-sidebar (GraphQL delete needs page tokens — DOM primary). */
+  /** Live: dom-sidebar (GraphQL delete needs page tokens — DOM primary).
+   * Never noop: sidebar may not be loaded at startup; always attempt deletion.
+   */
   async getDeleteMethods(ctx) {
-    const domCount = countMetaAiSidebarChats();
-    const domIds = await listPromptIds();
-
-    if (!domCount && !domIds.length) {
-      return [{ name: "noop", step: null, fn: () => ({ deleted: 0, total: 0 }) }];
-    }
-
     return [
       {
         name: "dom-sidebar",

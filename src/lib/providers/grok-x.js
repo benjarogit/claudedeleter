@@ -263,6 +263,8 @@ async function deleteAllSettingsDom(ctx) {
   }
 
   await confirmDialogs();
+  // X's API may take a moment to propagate the deletion
+  await sleep(3000);
   await assertGrokGone(ctx.fetchFn);
   return { deleted: "all", total: "all" };
 }

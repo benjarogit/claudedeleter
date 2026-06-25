@@ -131,7 +131,7 @@ async function deleteAllSettingsDom(ctx) {
     });
   }
 
-  await sleep(1200);
+  await sleep(2500);
 
   const bulkBtn = findChatGptSettingsBulkDelete();
   if (!bulkBtn) throw new Error("ChatGPT settings bulk delete button not found");

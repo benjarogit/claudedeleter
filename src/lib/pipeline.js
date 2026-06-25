@@ -58,6 +58,12 @@ export async function runDeletePipeline(ctx, provider, { beginPostVerify }) {
 export async function resumePipelineMethod(ctx, provider, pending, { beginPostVerify }) {
   const methods = await provider.getDeleteMethods(ctx);
   let index = pending.methodIndex;
+
+  // Stored index may be out of bounds when the method list differs after navigation
+  // (e.g. Gemini: index 2 stored on gemini.google.com, but myactivity.google.com returns 1 method)
+  if (index != null && !methods[index] && pending.step) {
+    index = methods.findIndex((m) => m.step === pending.step);
+  }
   if (index == null && pending.step) {
     index = methods.findIndex((m) => m.step === pending.step);
   }

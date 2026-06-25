@@ -56,6 +56,9 @@ async function assertGone(fetchFn) {
     /* DOM */
   }
 
+  // API confirmed 0 — sidebar DOM may be stale after API deletion
+  if (apiCount === 0) return;
+
   const domCount = countMistralSidebarChats();
   const parts = [];
   if (apiCount > 0) parts.push(`${apiCount} in API`);

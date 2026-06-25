@@ -25,7 +25,8 @@ async function listConversationIds(fetchFn) {
   if (!response.ok) throw new Error(`list HTTP ${response.status}`);
 
   const data = await response.json();
-  return (data.results || []).map((c) => c.id || c.sid).filter(Boolean);
+  // Pi uses "sid" as the path parameter for deletion; prefer it over generic "id"
+  return (data.results || []).map((c) => c.sid || c.id).filter(Boolean);
 }
 
 async function assertGone(fetchFn) {
@@ -35,6 +36,9 @@ async function assertGone(fetchFn) {
   } catch {
     /* DOM */
   }
+
+  // API confirmed 0 — sidebar DOM may be stale after API deletion
+  if (apiCount === 0) return;
 
   const domCount = countPiSidebarChats();
   const parts = [];

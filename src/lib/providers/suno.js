@@ -20,46 +20,93 @@ import { runDeleteLoop } from "../shared.js";
 
 const STUDIO_API = "https://studio-api-prod.suno.com";
 
-async function getSunoAuthHeader(fetchFn) {
+async function getSunoAuthHeaders(fetchFn) {
+  const headers = { "Content-Type": "application/json", Accept: "application/json" };
+
+  // Clerk JWT
   if (window.Clerk?.session?.getToken) {
-    const token = await window.Clerk.session.getToken();
-    if (token) return { Authorization: `Bearer ${token}` };
+    try {
+      const token = await window.Clerk.session.getToken();
+      if (token) headers.Authorization = `Bearer ${token}`;
+    } catch {
+      /* Clerk unavailable */
+    }
   }
-  return {};
+
+  // Anti-bot headers required by studio-api-prod since 2026
+  try {
+    const browserToken = JSON.stringify({
+      token: btoa(JSON.stringify({ timestamp: Date.now() })).replace(/=+$/, ""),
+    });
+    headers["browser-token"] = browserToken;
+
+    // device-id — try common localStorage keys, otherwise generate
+    const deviceId =
+      localStorage.getItem("suno-device-id") ||
+      localStorage.getItem("device_id") ||
+      localStorage.getItem("deviceId") ||
+      (() => {
+        const id = crypto.randomUUID();
+        try { localStorage.setItem("suno-device-id", id); } catch { /* quota */ }
+        return id;
+      })();
+    headers["device-id"] = deviceId;
+    headers["origin"] = "https://suno.com";
+    headers["referer"] = "https://suno.com/";
+  } catch {
+    /* storage/crypto unavailable */
+  }
+
+  return headers;
 }
 
 async function listClipIds(fetchFn) {
-  const auth = await getSunoAuthHeader(fetchFn);
-  const response = await fetchFn(
-    `${STUDIO_API}/api/project/me?page=1&sort=max_created_at_last_updated_clip&show_trashed=false`,
-    {
-      credentials: "include",
-      headers: { Accept: "application/json", ...auth },
-    }
-  );
-  if (!response.ok) throw new Error(`list HTTP ${response.status}`);
-
-  const data = await response.json();
+  const headers = await getSunoAuthHeaders(fetchFn);
   const clips = [];
-  for (const project of data.projects || data || []) {
-    for (const clip of project.clips || project.project_clips || []) {
-      const id = clip.id || clip.clip_id;
-      if (id) clips.push(id);
-    }
-  }
-  if (clips.length) return clips;
+  const seen = new Set();
 
-  const feed = await fetchFn(`${STUDIO_API}/api/feed/v2?page=0`, {
-    credentials: "include",
-    headers: { Accept: "application/json", ...auth },
-  });
-  if (feed.ok) {
-    const feedData = await feed.json();
-    for (const clip of feedData.clips || feedData || []) {
-      const id = clip.id || clip.clip_id;
-      if (id) clips.push(id);
+  // Primary: POST /api/feed/v3 (current Suno API as of 2026)
+  try {
+    let page = 0;
+    while (true) {
+      const response = await fetchFn(`${STUDIO_API}/api/feed/v3`, {
+        method: "POST",
+        credentials: "include",
+        headers,
+        body: JSON.stringify({ page }),
+      });
+      if (!response.ok) break;
+      const data = await response.json();
+      for (const clip of data.clips || []) {
+        const id = clip.id || clip.clip_id;
+        if (id && !seen.has(id)) { seen.add(id); clips.push(id); }
+      }
+      if (!data.has_more) break;
+      page++;
+      if (page > 20) break;
     }
+    if (clips.length) return clips;
+  } catch {
+    /* fall through */
   }
+
+  // Fallback: GET /api/feed/v2
+  try {
+    const feed = await fetchFn(`${STUDIO_API}/api/feed/v2?page=0`, {
+      credentials: "include",
+      headers,
+    });
+    if (feed.ok) {
+      const feedData = await feed.json();
+      for (const clip of feedData.clips || feedData || []) {
+        const id = clip.id || clip.clip_id;
+        if (id && !seen.has(id)) { seen.add(id); clips.push(id); }
+      }
+    }
+  } catch {
+    /* DOM only */
+  }
+
   return clips;
 }
 
@@ -88,7 +135,7 @@ async function deleteAllOneByOne(fetchFn, onProgress, delayMs) {
     return { deleted: 0, total: 0 };
   }
 
-  const auth = await getSunoAuthHeader(fetchFn);
+  const headers = await getSunoAuthHeaders(fetchFn);
 
   const result = await runDeleteLoop({
     ids,
@@ -99,7 +146,7 @@ async function deleteAllOneByOne(fetchFn, onProgress, delayMs) {
       const response = await fetchFn(`${STUDIO_API}/api/gen/trash`, {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json", Accept: "application/json", ...auth },
+        headers,
         body: JSON.stringify({ trash: true, clip_ids: [id] }),
       });
       if (!response.ok) throw new Error(`delete ${id} HTTP ${response.status}`);
@@ -140,7 +187,7 @@ export const sunoProvider = {
     try {
       apiIds = await listClipIds(ctx.fetchFn);
     } catch {
-      /* Clerk token */
+      /* API headers unavailable */
     }
     const domCount = countSunoLibraryClips();
 

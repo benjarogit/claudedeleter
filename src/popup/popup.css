@@ -32,7 +32,9 @@ header {
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
 }
 
 header img {
@@ -189,7 +191,29 @@ button.secondary {
 
 footer {
   margin-top: 14px;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.footer-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-dot {
+  color: var(--border);
+  font-size: 12px;
+  user-select: none;
+}
+
+.footer-label {
+  color: var(--muted);
+  font-size: 12px;
 }
 
 footer a {

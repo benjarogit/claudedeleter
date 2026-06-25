@@ -18,12 +18,17 @@ const ORIGIN = "https://agent.minimax.io";
 
 /**
  * Reads the JWT from localStorage set by the MiniMax web app.
+ * Tries multiple common key names across MiniMax app versions.
  *
  * @returns {string|null} Bearer token or null when unauthenticated.
  */
 function getToken() {
   try {
-    return localStorage.getItem("_token") || null;
+    for (const key of ["_token", "token", "access_token", "authToken", "jwt"]) {
+      const val = localStorage.getItem(key);
+      if (val && val.length > 20) return val;
+    }
+    return null;
   } catch {
     return null;
   }

@@ -49,6 +49,9 @@ async function assertPerplexityGone(fetchFn) {
     /* DOM only */
   }
 
+  // API confirmed 0 — sidebar DOM may be stale after API deletion
+  if (apiCount === 0) return;
+
   const domCount = countPerplexitySidebarChats();
   const parts = [];
   if (apiCount > 0) parts.push(`${apiCount} in API`);
