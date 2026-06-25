@@ -1,4 +1,4 @@
-# ACC v1.0.1 — Provider test matrix
+# ACC v1.0.0 — Provider test matrix
 
 **Live-Tests Phase 2A:** Alle 20 Provider vollständig durchgeführt (25. Jun 2026).
 
@@ -55,8 +55,8 @@ Phase 2B (alle Methoden per Extension-Button) wurde nicht durchgeführt — Phas
 
 | Check | Status |
 |-------|--------|
-| CWS manifest description ≤132 | **FIX 1.0.1** |
+| CWS manifest description ≤132 | **FIX 1.0.0** |
 | AMO 1.0.x upload | User: hochgeladen |
-| CWS 1.0.x upload | User: Fehler description → **1.0.1 zip neu** |
+| CWS 1.0.x upload | User: Fehler description → **1.0.0 zip neu** |
 | Ko-fi | User: erledigt |
 | Patreon Supporter 3 € | User: erledigt |

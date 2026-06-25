@@ -23,4 +23,4 @@
 4. Links: GitHub releases, AMO listing
 5. **Publish** the page when tier is ready
 
-After Ko-fi URL is confirmed, run `npm run build`. Optional patch **1.0.1** only if stores already shipped with a wrong link.
+After Ko-fi URL is confirmed, run `npm run build`. Optional patch **1.0.0** only if stores already shipped with a wrong link.

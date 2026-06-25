@@ -40,7 +40,7 @@ Open-Source-Browser-Erweiterung (MIT). Löscht alle Unterhaltungen auf unterstü
 | CrewAI | [app.crewai.com/studio/v2](https://app.crewai.com/studio/v2) |
 | MiniMax | [agent.minimax.io](https://agent.minimax.io) |
 | Z.ai | [chat.z.ai](https://chat.z.ai) |
-| Cursor | [cursor.com/agents](https://cursor.com/agents) |
+| Cursor | [cursor.com/agents](https://cursor.com/agents) · [50% Rabatt Referral](https://cursor.com/referral?code=UW6WJZLB8ECL) |
 
 > **Suno** löscht Bibliotheks-Clips/Songs, keine Chat-Threads. **CrewAI** löscht Studio-Automatisierungsprojekte.
 

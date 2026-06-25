@@ -1,4 +1,4 @@
-# ACC v1.0.1 — Store Submit Guide
+# ACC v1.0.0 — Store Submit Guide
 
 Artifacts (after `npm run build`):
 
@@ -101,7 +101,7 @@ Add-on slug: **ai-chat-cleaner1** — do not create a new listing.
 ## Chrome Web Store
 
 1. [Developer Dashboard](https://chrome.google.com/webstore/devconsole) → **AI Chat Cleaner** → **Package**
-2. Upload **`dist/acc-chrome.zip`** (v1.0.1)
+2. Upload **`dist/acc-chrome.zip`** (v1.0.0)
 3. **Store listing:**
    - Description: paste EN description above (≤132 chars short, full in body)
    - Language: add DE listing with DE description
@@ -118,7 +118,7 @@ Add-on slug: **ai-chat-cleaner1** — do not create a new listing.
 ## Microsoft Edge
 
 1. [Partner Center](https://partner.microsoft.com/dashboard/microsoftedge/overview) → **Extensions**
-2. Upload **`dist/acc-edge.zip`** (v1.0.1)
+2. Upload **`dist/acc-edge.zip`** (v1.0.0)
 3. Reuse CWS text/screenshots
 
 ---

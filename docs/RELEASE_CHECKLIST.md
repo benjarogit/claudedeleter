@@ -1,4 +1,4 @@
-# ACC v1.0.1 — Release Checklist
+# ACC v1.0.0 — Release Checklist
 
 Letzte Aktualisierung: 25. Jun 2026  
 Legende: ✅ erledigt · ⏳ warte auf manuelle Aktion · 🔧 noch zu tun
@@ -12,7 +12,7 @@ Legende: ✅ erledigt · ⏳ warte auf manuelle Aktion · 🔧 noch zu tun
 | 1.1 | 20 Provider implementiert (inkl. MiniMax + Z.ai) | ✅ |
 | 1.2 | Gemini-Methodenreihenfolge: api-batchexecute zuerst | ✅ |
 | 1.3 | `npm run build` → alle Artefakte in `dist/` | ✅ |
-| 1.4 | `node scripts/validate-release.mjs` → OK (20 Provider, v1.0.1, desc ≤132) | ✅ |
+| 1.4 | `node scripts/validate-release.mjs` → OK (20 Provider, v1.0.0, desc ≤132) | ✅ |
 | 1.5 | `node scripts/check-probe-coverage.mjs` → 20/20 | ✅ |
 | 1.6 | Chrome MV3 manifest + service_worker | ✅ |
 | 1.7 | Firefox MV3 + `data_collection_permissions.required: ["none"]` | ✅ |
@@ -51,14 +51,14 @@ Ergebnisse in `docs/TEST_MATRIX.md`.
 | # | Aufgabe | Status |
 |---|---------|--------|
 | 4.1 | Alle Commits lokal auf `main` | ✅ |
-| 4.2 | Tag `v1.0.1` auf neuesten Commit zeigend | ✅ |
+| 4.2 | Tag `v1.0.0` auf neuesten Commit zeigend | ✅ |
 | 4.3 | **`git push origin main`** — HEAD zu GitHub gepusht | ✅ |
-| 4.4 | **`git push origin v1.0.1 --force`** — Tag zu GitHub gepusht | ✅ |
-| 4.5 | GitHub Release v1.0.1 mit Release Notes + Artifacts | ✅ |
+| 4.4 | **`git push origin v1.0.0 --force`** — Tag zu GitHub gepusht | ✅ |
+| 4.5 | GitHub Release v1.0.0 mit Release Notes + Artifacts | ✅ |
 
 **Release Notes Vorlage (für Schritt 4.5):**
 ```
-## AI Chat Cleaner v1.0.1
+## AI Chat Cleaner v1.0.0
 
 ### Neu
 - MiniMax Agent (agent.minimax.io) als Provider #19
@@ -84,7 +84,7 @@ Ergebnisse in `docs/TEST_MATRIX.md`.
 
 | # | Aufgabe | Status |
 |---|---------|--------|
-| 5.1 | `dist/acc-chrome.zip` (v1.0.1) hochladen | ⏳ Du |
+| 5.1 | `dist/acc-chrome.zip` (v1.0.0) hochladen | ⏳ Du |
 | 5.2 | Short description (132 Zeichen EN) eintragen | ⏳ Du |
 | 5.3 | Full description EN eintragen | ⏳ Du |
 | 5.4 | Deutsche Sprache hinzufügen + DE-Beschreibung eintragen | ⏳ Du |
@@ -104,7 +104,7 @@ Grafiken in `assets/store-graphics/`.
 
 | # | Aufgabe | Status |
 |---|---------|--------|
-| 6.1 | `dist/acc-firefox.xpi` v1.0.1 hochladen | ⏳ Du |
+| 6.1 | `dist/acc-firefox.xpi` v1.0.0 hochladen | ⏳ Du |
 | 6.2 | Summary + Full description EN eintragen | ⏳ Du |
 | 6.3 | Deutsche Beschreibung (DE Locale) eintragen | ⏳ Du |
 | 6.4 | Screenshot 1 ersetzen (`screenshot-1-popup-1280x800.png`) | ⏳ Du |
@@ -171,8 +171,8 @@ Grafiken in `assets/store-graphics/`.
 
 ```
 1. git push origin main
-2. git push origin v1.0.1 --force
-3. GitHub Release erstellen (v1.0.1 + Release Notes + ZIP/XPI-Anhänge)
+2. git push origin v1.0.0 --force
+3. GitHub Release erstellen (v1.0.0 + Release Notes + ZIP/XPI-Anhänge)
 4. CWS: acc-chrome.zip hochladen + Grafiken + Beschreibungen
 5. AMO: acc-firefox.xpi hochladen + Grafiken + Beschreibungen
 6. Ko-fi + Patreon: aktualisierte Cover hochladen

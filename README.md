@@ -40,7 +40,7 @@ Open-source browser extension (MIT). Delete every conversation on supported AI s
 | CrewAI | [app.crewai.com/studio/v2](https://app.crewai.com/studio/v2) |
 | MiniMax | [agent.minimax.io](https://agent.minimax.io) |
 | Z.ai | [chat.z.ai](https://chat.z.ai) |
-| Cursor | [cursor.com/agents](https://cursor.com/agents) |
+| Cursor | [cursor.com/agents](https://cursor.com/agents) · [50% off referral](https://cursor.com/referral?code=UW6WJZLB8ECL) |
 
 > **Suno** deletes library clips/songs, not chat threads. **CrewAI** deletes Studio automation projects.
 

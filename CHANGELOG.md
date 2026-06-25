@@ -2,7 +2,7 @@
 
 All notable changes to AI Chat Cleaner (ACC) are documented here.
 
-## [1.0.1] — 2026-06-25
+## [1.0.0] — 2026-06-25
 
 ### Fixed
 

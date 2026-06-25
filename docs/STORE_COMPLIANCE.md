@@ -1,4 +1,4 @@
-# ACC v1.0.1 — Store compliance checklist
+# ACC v1.0.0 — Store compliance checklist
 
 References:
 - [Chrome Web Store publish](https://developer.chrome.com/docs/webstore/publish?hl=de)
@@ -13,7 +13,7 @@ References:
 - [x] Chrome service_worker vs Firefox background.scripts (build.mjs)
 - [x] Confirm dialog before irreversible delete
 - [x] No affiliate injection; support links only in extension UI footer
-- [x] Manifest description ≤132 chars (fixed in v1.0.1)
+- [x] Manifest description ≤132 chars (fixed in v1.0.0)
 - [x] 32×32 and 96×96 icons present
 
 ## AMO listing text (copy when uploading)
@@ -34,7 +34,7 @@ References:
 
 ## Post-upload
 
-- [ ] Firefox AMO v1.0.1 submitted
-- [ ] Chrome CWS v1.0.1 submitted
-- [ ] Edge v1.0.1 submitted (optional)
-- [x] GitHub Release v1.0.1 created — https://github.com/benjarogit/ai-chat-cleaner/releases/tag/v1.0.1
+- [ ] Firefox AMO v1.0.0 submitted
+- [ ] Chrome CWS v1.0.0 submitted
+- [ ] Edge v1.0.0 submitted (optional)
+- [x] GitHub Release v1.0.0 created — https://github.com/benjarogit/ai-chat-cleaner/releases/tag/v1.0.0

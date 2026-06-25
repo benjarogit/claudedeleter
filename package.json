@@ -1,6 +1,6 @@
 {
   "name": "ai-chat-cleaner",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "private": true,
   "description": "AI Chat Cleaner (ACC) — bulk-delete AI chat history on 18 platforms",
   "type": "module",
