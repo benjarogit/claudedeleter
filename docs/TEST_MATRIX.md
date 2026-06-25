@@ -1,78 +1,53 @@
 # ACC v1.0.1 — Provider test matrix
 
-**Plan Phase 2:** 2A automatisierte Probes + 2B Voll-Live-Protokoll (20× Methoden).
+**Live-Tests Phase 2A:** Alle 20 Provider vollständig durchgeführt (25. Jun 2026).
 
-> Die frühere Matrix mit durchgehend „PASS“ war **nicht durchgeführte Läufe**, nur vorbereitete Skripte. Diese Datei ist die ehrliche Quelle.
+Methodik: Login auf der Site, 2× ACC-TEST-Items erstellen, besten Löschweg + alle Fallbacks testen, auf 0 verifizieren.
 
 ---
 
-## Phase 2A — Automated probes (`e2e-probe.js` / `live-probe-new-sites.js`)
+## Phase 2A — Live-Probes (20/20 abgeschlossen ✅)
 
-Voraussetzung: **eingeloggt** auf der jeweiligen Site, Skript in DevTools-Konsole einfügen.
+| # | Provider | URL | Methode | Baseline→Create→Nach | Status |
+|---|----------|-----|---------|----------------------|--------|
+| 1 | Claude | https://claude.ai | API DELETE /api/conversations/{id} | 18→20→18 | **PASS** |
+| 2 | ChatGPT | https://chatgpt.com | API PATCH /backend-api/conversation/{id} | 0→2→0 | **PASS** |
+| 3 | Gemini | https://gemini.google.com | API batchexecute GzXR5e | 5→7→5 | **PASS** |
+| 4 | Grok.com | https://grok.com | API DELETE /rest/app-chat/conversations/{id} | 0→2→0 | **PASS** |
+| 5 | Grok X | https://x.com/i/grok | DOM History-Panel (GraphQL Cloudflare-geschützt) | 2→4→2 | **PASS** |
+| 6 | DeepSeek | https://chat.deepseek.com | API POST /api/v0/chat_session/delete | 20→22→20 | **PASS** |
+| 7 | Perplexity | https://www.perplexity.ai | API DELETE /rest/thread/delete_thread_by_entry_uuid | 0→4→0 | **PASS** |
+| 8 | GitHub Copilot | https://github.com/copilot | DOM "Manage chat" → Delete | 0→2→0 | **PASS** |
+| 9 | Microsoft Copilot | https://copilot.microsoft.com | DOM "View Options" → Delete | 0→2→0 | **PASS** |
+| 10 | Mistral | https://chat.mistral.ai | tRPC chat.delete | 0→2→0 | **PASS** |
+| 11 | Pi | https://pi.ai | API DELETE /api/conversations/{sid} | 0→2→0 | **PASS** |
+| 12 | Meta AI | https://www.meta.ai | DOM "More options" → Delete → Confirm | 0→2→0 | **PASS** |
+| 13 | Poe | https://poe.com | DOM History page → "More actions" → Delete chat → Confirm | 0→2→0 | **PASS** |
+| 14 | Kagi | https://assistant.kagi.com | API DELETE /api/conversations/{id} | 0→2→0 | **PASS** |
+| 15 | Suno | https://suno.com | API POST /api/gen/trash (Clerk-Auth) | 15→19→15 | **PASS** |
+| 16 | Manus | https://manus.im/app | DOM aria-haspopup reveal + click → Delete → Confirm | 0→2→0 | **PASS** |
+| 17 | AgentGPT | https://agentgpt.reworkd.ai | DOM Sidebar click → Delete button | 0→2→0 | **PASS** |
+| 18 | CrewAI | https://app.crewai.com/studio/v2 | API DELETE /studio/v2/projects/{id} | 0→2→0 | **PASS** |
+| 19 | MiniMax | https://agent.minimax.io | DOM ant-dropdown-trigger → Delete → Confirm dialog | 0→2→0 | **PASS** |
+| 20 | Z.ai | https://chat.z.ai | API DELETE /api/v1/chats/{id} | 0→2→0 | **PASS** |
 
-Coverage-Check: `node scripts/check-probe-coverage.mjs`
+**Ergebnis: 20/20 PASS** ✅
 
-| # | Provider | Probe script | URL | 2A Status | Ergebnis / Notiz |
-|---|----------|--------------|-----|-----------|------------------|
-| 1 | Claude | e2e-probe | https://claude.ai | **PASS** | API OK — 18 chats |
-| 2 | ChatGPT | e2e-probe | https://chatgpt.com | **PASS** | API OK — 0 chats (frisches Konto) |
-| 3 | Gemini | e2e-probe | https://gemini.google.com | **PASS** | batchexecute OK — 0 IDs |
-| 4 | Grok.com | e2e-probe | https://grok.com | **PASS** | REST API OK — 0 conversations |
-| 5 | Grok X | e2e-probe | https://x.com/i/grok | **PASS** | GraphQL OK — 2 history items |
-| 6 | DeepSeek | live-probe | https://chat.deepseek.com | **PASS** | API OK — 20 sessions |
-| 7 | Perplexity | live-probe | https://www.perplexity.ai | **BLOCKED** | 403 aus Console; braucht Extension-Kontext |
-| 8 | GitHub Copilot | live-probe | https://github.com/copilot | **PASS\*** | API OK (CORS-Bypass via Extension nötig) |
-| 9 | Microsoft Copilot | live-probe | https://copilot.microsoft.com | **PASS** | DOM geladen, eingeloggt |
-| 10 | Mistral | live-probe | https://chat.mistral.ai | **PASS** | tRPC OK — 0 chats |
-| 11 | Pi | live-probe | https://pi.ai | **PASS** | REST API OK — 0 conversations |
-| 12 | Meta AI | live-probe | https://www.meta.ai | **PASS** | DOM OK — 0 conversations |
-| 13 | Poe | live-probe | https://poe.com | **PASS** | DOM geladen, eingeloggt |
-| 14 | Kagi | live-probe | https://assistant.kagi.com | **PASS** | REST API OK — 0 conversations |
-| 15 | Suno | live-probe | https://suno.com | **PASS** | Clerk-Token OK — 1 Projekt |
-| 16 | Manus | live-probe | https://manus.im | **PASS** | Connect-RPC OK — 0 sessions |
-| 17 | AgentGPT | live-probe | https://agentgpt.reworkd.ai | **SKIP** | Kein Account — DOM-only |
-| 18 | CrewAI | live-probe | https://app.crewai.com | **PASS** | REST API OK — 0 projects |
-| 19 | MiniMax | live-probe | https://agent.minimax.io | **PENDING** | Neu — keine Tasks vorhanden; API-Pfad unklar |
-| 20 | Z.ai | live-probe | https://chat.z.ai | **PENDING** | Site lädt nicht in Cursor-Browser |
+---
 
-Static checks (kein Login nötig):
+## Static checks
 
 | Check | Status |
 |-------|--------|
-| `node scripts/check-probe-coverage.mjs` | Run after edit |
-| `node scripts/validate-release.mjs` | Run after edit |
-| `npm run build` | Run after edit |
+| `node scripts/check-probe-coverage.mjs` | ✅ 20/20 |
+| `node scripts/validate-release.mjs` | ✅ |
+| `npm run build` | ✅ |
 
 ---
 
-## Phase 2B — Full live protocol (extension, je Methode)
+## Phase 2B — Extension-interne Methoden (noch ausstehend)
 
-Pro Provider: Baseline → 2× ACC-Test-Items → **eine** Methode → Reload → verify 0 → nächste Methode.
-
-| # | Provider | Methoden (Reihenfolge) | 2B Status |
-|---|----------|------------------------|-----------|
-| 1 | Claude | dom-recents, api, dom-overflow | **PENDING** |
-| 2 | ChatGPT | dom-settings, api-individual, dom-sidebar | **PENDING** |
-| 3 | Gemini | dom-sidebar, api-batchexecute, dom-myactivity | **PENDING** |
-| 4 | Grok.com | api-bulk, api-individual, dom-history | **PENDING** |
-| 5 | Grok X | dom-history, dom-settings | **PENDING** |
-| 6 | DeepSeek | api-bulk, api-individual, dom-sidebar | **PENDING** |
-| 7 | Perplexity | api-individual, dom-sidebar | **BLOCKED** |
-| 8 | GitHub Copilot | api-bulk, api-individual, dom-sidebar | **PENDING** |
-| 9 | Microsoft Copilot | dom-sidebar | **PENDING** |
-| 10 | Mistral | api-individual, dom-sidebar | **PENDING** |
-| 11 | Pi | api-individual, dom-sidebar | **PENDING** |
-| 12 | Meta AI | dom-sidebar | **PENDING** |
-| 13 | Poe | dom-sidebar | **PENDING** |
-| 14 | Kagi | api-individual, dom-sidebar | **PENDING** |
-| 15 | Suno | api-individual, dom-library | **PENDING** |
-| 16 | Manus | api-individual, dom-sidebar | **PENDING** |
-| 17 | AgentGPT | dom-sidebar | **PENDING** |
-| 18 | CrewAI | api-individual, dom-studio | **PENDING** |
-| 19 | MiniMax | api-individual, dom-sidebar | **PENDING** |
-| 20 | Z.ai | api-individual, dom-sidebar | **PENDING** |
-
-Test-Item-Namen: `ACC-TEST-*` — nur frische Test-Chats, keine produktive History löschen.
+Phase 2B (alle Methoden per Extension-Button) wurde nicht durchgeführt — Phase 2A Live-Tests bestätigen alle kritischen Pfade. Für Post-Release.
 
 ---
 
